@@ -4118,34 +4118,73 @@ class HomeManagerApp {
     }
 
     updateNotificationUI(permission) {
-        const toggleBtn = document.getElementById('notification-toggle-btn');
-        const toggleText = document.getElementById('notification-toggle-text');
+        const toggleSwitch = document.getElementById('notification-toggle-switch');
         const statusDesc = document.getElementById('notification-status');
 
-        if (!toggleBtn || !toggleText || !statusDesc) return;
+        if (!toggleSwitch || !statusDesc) return;
 
         if (permission === 'granted') {
-            toggleText.textContent = 'Disable';
+            toggleSwitch.checked = localStorage.getItem('notificationsEnabled') !== 'false';
             statusDesc.textContent = 'Notifications are enabled';
-            toggleBtn.style.background = 'rgba(74, 222, 128, 0.15)';
-            toggleBtn.style.borderColor = 'rgba(74, 222, 128, 0.3)';
-            toggleBtn.style.color = '#4ade80';
         } else if (permission === 'denied') {
-            toggleText.textContent = 'Blocked';
+            toggleSwitch.checked = false;
+            toggleSwitch.disabled = true;
             statusDesc.textContent = 'Notifications are blocked. Please enable in browser settings.';
-            toggleBtn.style.background = 'rgba(239, 68, 68, 0.15)';
-            toggleBtn.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-            toggleBtn.style.color = '#ef4444';
         } else if (permission === 'not-supported') {
-            toggleText.textContent = 'Not Supported';
+            toggleSwitch.checked = false;
+            toggleSwitch.disabled = true;
             statusDesc.textContent = 'Notifications are not supported on this device';
-            toggleBtn.disabled = true;
         } else {
-            toggleText.textContent = 'Enable';
+            toggleSwitch.checked = false;
             statusDesc.textContent = 'Enable notifications for bills, tasks, and reminders';
-            toggleBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-            toggleBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            toggleBtn.style.color = 'var(--text-white)';
+        }
+    }
+
+    async toggleNotificationsSwitch() {
+        const toggleSwitch = document.getElementById('notification-toggle-switch');
+        if (!toggleSwitch) return;
+
+        if (toggleSwitch.checked) {
+            // Turn on notifications
+            if (!('Notification' in window)) {
+                alert('Notifications are not supported on this device.');
+                toggleSwitch.checked = false;
+                return;
+            }
+
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    localStorage.setItem('notificationsEnabled', 'true');
+                    this.updateNotificationUI('granted');
+                    
+                    // Try to subscribe to push notifications
+                    if (this.swRegistration) {
+                        try {
+                            const subscription = await this.swRegistration.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: this.urlBase64ToUint8Array(this.getVapidPublicKey())
+                            });
+                            console.log('Push subscription:', subscription);
+                        } catch (error) {
+                            console.log('Push subscription failed (using local notifications):', error);
+                        }
+                    }
+                } else {
+                    toggleSwitch.checked = false;
+                    this.updateNotificationUI('denied');
+                }
+            } else if (Notification.permission === 'granted') {
+                localStorage.setItem('notificationsEnabled', 'true');
+                this.updateNotificationUI('granted');
+            } else {
+                toggleSwitch.checked = false;
+                alert('Notifications are blocked. Please enable them in your browser settings.');
+            }
+        } else {
+            // Turn off notifications
+            localStorage.setItem('notificationsEnabled', 'false');
+            this.updateNotificationUI(Notification.permission);
         }
     }
 
