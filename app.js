@@ -2571,8 +2571,8 @@ class HomeManagerApp {
                         </button>
                         ` : ''}
                     </h2>
-                    <div class="recent-updates-container" id="recent-updates-container" ${isCollapsed ? 'class="recent-updates-container collapsed"' : ''}>
-                        <div class="recent-updates-list" id="recent-updates-list" ${isCollapsed ? 'class="recent-updates-list"' : 'class="recent-updates-list expanded"'}>
+                    <div class="recent-updates-container ${isCollapsed ? 'collapsed' : ''}" id="recent-updates-container">
+                        <div class="recent-updates-list ${isCollapsed ? '' : 'expanded'}" id="recent-updates-list">
                             ${recentActivity.length > 0 ? recentActivity.map((activity, index) => {
                             const timeAgo = this.getTimeAgo(activity.timestamp);
                             let title = '';
@@ -2625,7 +2625,11 @@ class HomeManagerApp {
                                     <div class="recent-update-time">${timeAgo}</div>
                                 </div>
                             `;
-                        }).join('')}
+                            }).join('') : `
+                            <div style="text-align: center; padding: 20px; color: var(--text-gray);">
+                                <p>No recent updates</p>
+                            </div>
+                            `}
                         </div>
                         ${recentActivity.length > 5 ? `
                         <button class="expand-updates-btn" id="expand-updates-btn" onclick="app.toggleRecentUpdates()">
@@ -2637,7 +2641,7 @@ class HomeManagerApp {
                         ` : ''}
                     </div>
                 </div>
-                ` : '';
+                `;
             })()}
 
             <!-- Upcoming Bills -->
