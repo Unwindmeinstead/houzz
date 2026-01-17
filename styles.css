@@ -2560,6 +2560,7 @@ body {
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
 }
 
 .overlay-content {
@@ -2574,6 +2575,7 @@ body {
     position: relative;
     border: 2px solid;
     border-image: var(--gradient-border) 1;
+    box-sizing: border-box;
 }
 
 /* Slide System */
@@ -2586,6 +2588,7 @@ body {
     padding: 24px;
     max-height: 75vh;
     min-height: 0;
+    box-sizing: border-box;
 }
 
 .slide.active {
@@ -2790,6 +2793,10 @@ body {
     color: var(--text-white);
     font-size: 15px;
     font-family: inherit;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    max-width: 100%;
 }
 
 .form-group input:focus,
