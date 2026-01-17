@@ -458,10 +458,10 @@ class HomeManagerApp {
                 view.classList.remove('active');
             });
             
-            // Show home view
-            const homeView = document.getElementById('home-view');
-            if (homeView) {
-                homeView.classList.add('active');
+            // Show main content view (this is the home view container)
+            const mainContentView = document.getElementById('main-content-view');
+            if (mainContentView) {
+                mainContentView.classList.add('active');
             }
             
             // Update bottom navigation
