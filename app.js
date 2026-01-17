@@ -416,7 +416,7 @@ class HomeManagerApp {
                     e.preventDefault();
                     e.stopPropagation();
                     HapticFeedback.light();
-                    this.switchTab(tab);
+                this.switchTab(tab);
                 }
             }
         });
@@ -522,6 +522,7 @@ class HomeManagerApp {
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
+        let isSwiping = false;
 
         mainContent.addEventListener('touchstart', (e) => {
             // Don't trigger swipe if touching a scrollable element
@@ -530,13 +531,37 @@ class HomeManagerApp {
                 e.target.closest('.recent-updates-list') ||
                 e.target.closest('.tasks-list') ||
                 e.target.closest('.items-grid') ||
-                e.target.closest('.overlay')) {
+                e.target.closest('.overlay') ||
+                e.target.closest('button') ||
+                e.target.closest('input') ||
+                e.target.closest('select')) {
                 return;
             }
             
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
+            const touch = e.changedTouches[0];
+            touchStartX = touch.screenX;
+            touchStartY = touch.screenY;
+            isSwiping = false;
         }, { passive: true });
+
+        mainContent.addEventListener('touchmove', (e) => {
+            if (!touchStartX) return;
+            
+            const touch = e.changedTouches[0];
+            const deltaX = touch.screenX - touchStartX;
+            const deltaY = touch.screenY - touchStartY;
+            const absDeltaX = Math.abs(deltaX);
+            const absDeltaY = Math.abs(deltaY);
+
+            // Check if it's a horizontal swipe
+            if (absDeltaX > 10 && absDeltaX > absDeltaY) {
+                isSwiping = true;
+                // Prevent default scrolling during horizontal swipe
+                if (absDeltaX > 20) {
+                    e.preventDefault();
+                }
+            }
+        }, { passive: false });
 
         mainContent.addEventListener('touchend', (e) => {
             // Don't trigger swipe if touching a scrollable element
@@ -545,14 +570,32 @@ class HomeManagerApp {
                 e.target.closest('.recent-updates-list') ||
                 e.target.closest('.tasks-list') ||
                 e.target.closest('.items-grid') ||
-                e.target.closest('.overlay')) {
+                e.target.closest('.overlay') ||
+                e.target.closest('button') ||
+                e.target.closest('input') ||
+                e.target.closest('select')) {
+                touchStartX = 0;
                 return;
             }
 
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
+            if (!touchStartX) return;
+
+            const touch = e.changedTouches[0];
+            touchEndX = touch.screenX;
+            touchEndY = touch.screenY;
             
-            this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+            // Check if touch started in bottom area (bottom 40% of screen) or if it's a clear horizontal swipe
+            const screenHeight = window.innerHeight;
+            const touchStartYPercent = (touchStartY / screenHeight) * 100;
+            const isBottomArea = touchStartYPercent > 60; // Bottom 40% of screen
+            
+            // Allow swipe if it's in bottom area OR if it's a clear horizontal swipe
+            if (isBottomArea || isSwiping) {
+                this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+            }
+            
+            touchStartX = 0;
+            isSwiping = false;
         }, { passive: true });
     }
 
@@ -583,18 +626,30 @@ class HomeManagerApp {
                 // Swipe left - go to next tab
                 const nextIndex = (currentIndex + 1) % tabs.length;
                 HapticFeedback.light();
-                this.switchTab(tabs[nextIndex]);
+                this.switchTab(tabs[nextIndex], 'left');
             } else {
                 // Swipe right - go to previous tab
                 const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
                 HapticFeedback.light();
-                this.switchTab(tabs[prevIndex]);
+                this.switchTab(tabs[prevIndex], 'right');
             }
         }
     }
 
-    switchTab(tab) {
+    switchTab(tab, direction = null) {
         if (!tab) return;
+        
+        const mainContentView = document.getElementById('main-content-view');
+        if (!mainContentView) return;
+        
+        // Add slide animation class based on direction
+        if (direction === 'left') {
+            mainContentView.classList.add('slide-in-left');
+            mainContentView.classList.remove('slide-in-right');
+        } else if (direction === 'right') {
+            mainContentView.classList.add('slide-in-right');
+            mainContentView.classList.remove('slide-in-left');
+        }
         
         this.currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -611,7 +666,6 @@ class HomeManagerApp {
             });
             
             // Show main content view (this is the home view container)
-            const mainContentView = document.getElementById('main-content-view');
             if (mainContentView) {
                 mainContentView.classList.add('active');
             }
@@ -634,6 +688,13 @@ class HomeManagerApp {
         } else if (tab === 'categories') {
             this.renderCategories();
         }
+        
+        // Remove animation classes after animation completes
+        setTimeout(() => {
+            if (mainContentView) {
+                mainContentView.classList.remove('slide-in-left', 'slide-in-right');
+            }
+        }, 300);
     }
 
     switchView(view) {
@@ -1283,19 +1344,19 @@ class HomeManagerApp {
             }
         } else {
             // If editing, refresh current view
-            if (this.currentView === 'home') {
+        if (this.currentView === 'home') {
                 this.renderHome();
                 // Check if we need to render tasks tab
                 const activeTab = document.querySelector('.tab-btn.active')?.getAttribute('data-tab');
                 if (activeTab === 'tasks') {
-                    this.renderTasks();
+            this.renderTasks();
                 }
-            } else if (this.currentView === 'cars') {
-                this.renderCars();
-            } else if (this.currentView === 'finance') {
-                this.renderFinance();
-            } else if (this.currentView === 'bills') {
-                this.renderBills();
+        } else if (this.currentView === 'cars') {
+            this.renderCars();
+        } else if (this.currentView === 'finance') {
+            this.renderFinance();
+        } else if (this.currentView === 'bills') {
+            this.renderBills();
             } else if (this.currentView === 'insurances') {
                 this.renderInsurances();
             } else if (this.currentView === 'subscriptions') {
@@ -3548,7 +3609,7 @@ class HomeManagerApp {
     createTaskElement(task) {
         const taskEl = document.createElement('div');
         taskEl.className = 'task-item';
-        
+
         const content = document.createElement('div');
         content.className = 'task-content';
 
@@ -3676,8 +3737,8 @@ class HomeManagerApp {
             container.innerHTML = `
                 <div class="category-view-header">
                     <div>
-                        <h2 class="category-view-title">Cars</h2>
-                        <p class="category-view-subtitle">0 cars registered</p>
+                    <h2 class="category-view-title">Cars</h2>
+                    <p class="category-view-subtitle">0 cars registered</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         ${this.renderViewToggle()}
@@ -3711,9 +3772,9 @@ class HomeManagerApp {
         container.innerHTML = `
             <div class="category-view-header">
                 <div>
-                    <h2 class="category-view-title">Cars</h2>
-                    <p class="category-view-subtitle">${cars.length} car${cars.length !== 1 ? 's' : ''} registered</p>
-                </div>
+                <h2 class="category-view-title">Cars</h2>
+                <p class="category-view-subtitle">${cars.length} car${cars.length !== 1 ? 's' : ''} registered</p>
+            </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
                     <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('cars')" title="Add Car">
@@ -3757,7 +3818,7 @@ class HomeManagerApp {
                                 <div class="item-card-subtitle">${car.year || 'Year not set'}</div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <div class="item-card-badge">Vehicle</div>
+                            <div class="item-card-badge">Vehicle</div>
                                 <button class="item-delete-btn" data-category="cars" data-item-id="${car.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('cars', '${car.id}', '${(car.make || '') + ' ' + (car.model || '')}')" title="Delete">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M3 6h18"/>
@@ -3786,9 +3847,9 @@ class HomeManagerApp {
                                             <circle cx="12" cy="12" r="10"/>
                                             <path d="M12 6v6l4 2"/>
                                         </svg>
-                                    </div>
+                        </div>
                                     <span>${parseInt(car.mileage).toLocaleString()} miles</span>
-                                </div>
+                    </div>
                             ` : ''}
                         </div>
                         ${car.insuranceProvider || car.insuranceExp ? `
@@ -3903,8 +3964,8 @@ class HomeManagerApp {
             container.innerHTML = `
                 <div class="category-view-header">
                     <div>
-                        <h2 class="category-view-title">Finance</h2>
-                        <p class="category-view-subtitle">0 transactions</p>
+                    <h2 class="category-view-title">Finance</h2>
+                    <p class="category-view-subtitle">0 transactions</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         ${this.renderViewToggle()}
@@ -3942,9 +4003,9 @@ class HomeManagerApp {
         container.innerHTML = `
             <div class="category-view-header">
                 <div>
-                    <h2 class="category-view-title">Finance</h2>
-                    <p class="category-view-subtitle">${finances.length} transaction${finances.length !== 1 ? 's' : ''}</p>
-                </div>
+                <h2 class="category-view-title">Finance</h2>
+                <p class="category-view-subtitle">${finances.length} transaction${finances.length !== 1 ? 's' : ''}</p>
+            </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
                     <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('finances')" title="Add Finance">
@@ -3982,7 +4043,7 @@ class HomeManagerApp {
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="item-card-badge finance-category-badge" data-category="${financeCategory}">${categoryDisplay}</div>
-                                    <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
+                                <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
                                     <button class="item-delete-btn" data-category="finances" data-item-id="${finance.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('finances', '${finance.id}', '${(finance.description || categoryDisplay).replace(/'/g, "\\'")}')" title="Delete">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 6h18"/>
@@ -4131,8 +4192,8 @@ class HomeManagerApp {
             container.innerHTML = `
                 <div class="category-view-header">
                     <div>
-                        <h2 class="category-view-title">Bills</h2>
-                        <p class="category-view-subtitle">0 bills</p>
+                    <h2 class="category-view-title">Bills</h2>
+                    <p class="category-view-subtitle">0 bills</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         ${this.renderViewToggle()}
@@ -4169,9 +4230,9 @@ class HomeManagerApp {
         container.innerHTML = `
             <div class="category-view-header">
                 <div>
-                    <h2 class="category-view-title">Bills</h2>
-                    <p class="category-view-subtitle">${bills.length} bill${bills.length !== 1 ? 's' : ''}</p>
-                </div>
+                <h2 class="category-view-title">Bills</h2>
+                <p class="category-view-subtitle">${bills.length} bill${bills.length !== 1 ? 's' : ''}</p>
+            </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
                     <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('bills')" title="Add Bill">
@@ -4200,8 +4261,8 @@ class HomeManagerApp {
                                     <div class="item-card-subtitle">${bill.frequency || 'One-time'}</div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div class="item-card-badge" style="${isOverdue ? 'background: rgba(248, 113, 113, 0.2); border-color: #f87171; color: #f87171;' : isDueSoon ? 'background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24;' : bill.paid ? 'background: rgba(74, 222, 128, 0.2); border-color: #4ade80; color: #4ade80;' : ''}">
-                                        ${bill.paid ? 'Paid' : isOverdue ? 'Overdue' : isDueSoon ? 'Due Soon' : 'Pending'}
+                                <div class="item-card-badge" style="${isOverdue ? 'background: rgba(248, 113, 113, 0.2); border-color: #f87171; color: #f87171;' : isDueSoon ? 'background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24;' : bill.paid ? 'background: rgba(74, 222, 128, 0.2); border-color: #4ade80; color: #4ade80;' : ''}">
+                                    ${bill.paid ? 'Paid' : isOverdue ? 'Overdue' : isDueSoon ? 'Due Soon' : 'Pending'}
                                     </div>
                                     <button class="item-delete-btn" data-category="bills" data-item-id="${bill.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('bills', '${bill.id}', '${(bill.name || 'Bill').replace(/'/g, "\\'")}')" title="Delete">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
