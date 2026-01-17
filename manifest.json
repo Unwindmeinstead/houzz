@@ -1,0 +1,14 @@
+{
+  "name": "Home Manager",
+  "short_name": "Home Manager",
+  "description": "Track cars, bills, todos, insurances, finances, and savings",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
