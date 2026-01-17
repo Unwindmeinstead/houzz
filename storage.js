@@ -14,7 +14,8 @@ class StorageManager {
                 insurances: [],
                 finances: [],
                 savings: [],
-                checking: []
+                checking: [],
+                subscriptions: []
             });
         }
     }
@@ -124,7 +125,8 @@ class StorageManager {
             insurances: data.insurances?.length || 0,
             finances: data.finances?.length || 0,
             savings: data.savings?.length || 0,
-            checking: data.checking?.length || 0
+            checking: data.checking?.length || 0,
+            subscriptions: data.subscriptions?.length || 0
         };
     }
 }

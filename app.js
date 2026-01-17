@@ -477,6 +477,8 @@ class HomeManagerApp {
             this.renderTasks();
         } else if (tab === 'insurances') {
             this.renderInsurances();
+        } else if (tab === 'subscriptions') {
+            this.renderSubscriptions();
         } else if (tab === 'categories') {
             this.renderCategories();
         }
@@ -584,7 +586,8 @@ class HomeManagerApp {
             insurances: 'Insurance',
             finances: 'Finance',
             savings: 'Savings Goal',
-            checking: 'Checking'
+            checking: 'Checking',
+            subscriptions: 'Subscription'
         };
 
         formTitle.textContent = this.editingItem ? `Edit ${categoryNames[category] || 'Item'}` : `Add ${categoryNames[category] || 'Item'}`;
@@ -802,6 +805,36 @@ class HomeManagerApp {
                     <div class="form-group">
                         <label for="item-balance">Checking Account Balance</label>
                         <input type="number" id="item-balance" name="balance" placeholder="0.00" step="0.01" required>
+                    </div>
+                `;
+                break;
+            case 'subscriptions':
+                formHTML = `
+                    <div class="form-group">
+                        <label for="item-name">Subscription Name</label>
+                        <input type="text" id="item-name" name="name" placeholder="e.g., Netflix, Spotify" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-amount">Monthly Amount</label>
+                        <input type="number" id="item-amount" name="amount" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-billingDate">Billing Date</label>
+                        <input type="date" id="item-billingDate" name="billingDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-frequency">Frequency</label>
+                        <select id="item-frequency" name="frequency">
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="auto-renew" name="autoRenew">
+                            <span>Auto-renew</span>
+                        </label>
                     </div>
                 `;
                 break;
@@ -2393,6 +2426,20 @@ class HomeManagerApp {
                 <div class="summary-card">
                     <div class="summary-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <line x1="6" y1="8" x2="18" y2="8"/>
+                            <line x1="6" y1="12" x2="18" y2="12"/>
+                            <line x1="6" y1="16" x2="14" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value">$${totalCheckingBalance.toFixed(2)}</div>
+                        <div class="summary-card-label">Checking</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 16v-3l2-5h14l2 5v3" />
                             <path d="M5 16h14" />
                             <circle cx="7.5" cy="16.5" r="1.5" />
@@ -2407,15 +2454,12 @@ class HomeManagerApp {
                 <div class="summary-card">
                     <div class="summary-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                            <line x1="6" y1="8" x2="18" y2="8"/>
-                            <line x1="6" y1="12" x2="18" y2="12"/>
-                            <line x1="6" y1="16" x2="14" y2="16"/>
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value">$${totalCheckingBalance.toFixed(2)}</div>
-                        <div class="summary-card-label">Checking</div>
+                        <div class="summary-card-value">$${totalSubscriptions.toFixed(2)}</div>
+                        <div class="summary-card-label">Subscriptions</div>
                     </div>
                 </div>
             </div>
@@ -3763,6 +3807,119 @@ class HomeManagerApp {
                             </div>
                             <div class="item-card-amount ${isIncome ? 'positive' : 'negative'}">
                                 ${isIncome ? '+' : '-'}$${Math.abs(amount).toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        this.setupCardClickHandlers();
+    }
+
+    renderSubscriptions() {
+        const container = document.getElementById('tasks-container');
+        if (!container) return;
+        
+        const subscriptions = storage.getAll('subscriptions') || [];
+        const sortedSubscriptions = [...subscriptions].sort((a, b) => {
+            const dateA = new Date(a.billingDate || '9999-12-31');
+            const dateB = new Date(b.billingDate || '9999-12-31');
+            return dateA - dateB;
+        });
+        
+        if (subscriptions.length === 0) {
+            container.innerHTML = `
+                <div class="category-view-header">
+                    <div>
+                        <h2 class="category-view-title">Subscriptions</h2>
+                        <p class="category-view-subtitle">0 subscriptions</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="tasks-add-btn" onclick="app.openAddModal('subscriptions')" title="Add Subscription">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 8v8" />
+                                <path d="M8 12h8" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+                            <rect x="8" y="8" width="48" height="48" rx="4"/>
+                            <line x1="20" y1="24" x2="44" y2="24"/>
+                            <line x1="20" y1="32" x2="36" y2="32"/>
+                            <line x1="20" y1="40" x2="44" y2="40"/>
+                        </svg>
+                    </div>
+                    <div class="empty-state-title">No subscriptions yet</div>
+                    <div class="empty-state-text">Tap the + button to add your first subscription</div>
+                </div>
+            `;
+            return;
+        }
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        container.innerHTML = `
+            <div class="category-view-header">
+                <div>
+                    <h2 class="category-view-title">Subscriptions</h2>
+                    <p class="category-view-subtitle">${subscriptions.length} subscription${subscriptions.length !== 1 ? 's' : ''}</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="tasks-add-btn" onclick="app.openAddModal('subscriptions')" title="Add Subscription">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 8v8" />
+                            <path d="M8 12h8" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="items-grid view-mode-${this.cardViewMode}">
+                ${sortedSubscriptions.map((subscription, index) => {
+                    const billingDate = subscription.billingDate ? new Date(subscription.billingDate) : null;
+                    const amount = parseFloat(subscription.amount || 0);
+                    const formattedDate = billingDate ? billingDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+                    
+                    return `
+                        <div class="item-card" data-category="subscriptions" data-index="${index}" data-item-id="${subscription.id}">
+                            <div class="item-card-header">
+                                <div>
+                                    <div class="item-card-title">${subscription.name || 'Subscription'}</div>
+                                    <div class="item-card-subtitle">${subscription.frequency || 'Monthly'}</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    ${subscription.autoRenew ? `
+                                    <div class="item-card-badge" style="background: rgba(74, 222, 128, 0.2); border-color: #4ade80; color: #4ade80;">
+                                        Auto-renew
+                                    </div>
+                                    ` : ''}
+                                    <button class="item-delete-btn" data-category="subscriptions" data-item-id="${subscription.id}" onclick="event.stopPropagation(); app.confirmDelete('subscriptions', '${subscription.id}', '${(subscription.name || 'Subscription').replace(/'/g, "\\'")}')" title="Delete">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 6h18"/>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="item-card-amount">$${amount.toFixed(2)}</div>
+                            <div class="item-card-details">
+                                <div class="item-card-detail">
+                                    <div class="item-card-detail-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                    </div>
+                                    <span>Billing: ${formattedDate}</span>
+                                </div>
                             </div>
                         </div>
                     `;
