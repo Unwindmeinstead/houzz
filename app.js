@@ -3088,8 +3088,11 @@ class HomeManagerApp {
         
         // Render header with add button
         const headerHTML = `
-            <div class="tasks-view-header">
-                <h2 class="tasks-view-title">Tasks</h2>
+            <div class="category-view-header">
+                <div>
+                    <h2 class="category-view-title">Tasks</h2>
+                    <p class="category-view-subtitle">${todos.length} task${todos.length !== 1 ? 's' : ''}</p>
+                </div>
                 <button class="tasks-add-btn" onclick="app.openAddModal('todos')" title="Add Task">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="9" />
@@ -3167,13 +3170,34 @@ class HomeManagerApp {
 
         // Add empty state if no tasks
         if (todos.length === 0 && Object.keys(grouped).length === 0) {
-            const emptyState = document.createElement('div');
-            emptyState.style.cssText = 'text-align: center; padding: 40px 20px; color: var(--text-gray);';
-            emptyState.innerHTML = `
-                <p style="font-size: 16px; margin-bottom: 8px;">No tasks yet</p>
-                <p style="font-size: 14px;">Tap the + button to add your first task</p>
+            container.innerHTML = `
+                <div class="category-view-header">
+                    <div>
+                        <h2 class="category-view-title">Tasks</h2>
+                        <p class="category-view-subtitle">0 tasks</p>
+                    </div>
+                    <button class="tasks-add-btn" onclick="app.openAddModal('todos')" title="Add Task">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 8v8" />
+                            <path d="M8 12h8" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+                            <rect x="8" y="8" width="48" height="48" rx="4"/>
+                            <line x1="20" y1="24" x2="44" y2="24"/>
+                            <line x1="20" y1="32" x2="36" y2="32"/>
+                            <line x1="20" y1="40" x2="44" y2="40"/>
+                        </svg>
+                    </div>
+                    <div class="empty-state-title">No tasks yet</div>
+                    <div class="empty-state-text">Tap the + button to add your first task</div>
+                </div>
             `;
-            container.appendChild(emptyState);
+            return;
         }
     }
 
