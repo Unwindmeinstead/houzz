@@ -50,3 +50,66 @@ self.addEventListener('activate', (event) => {
     })
   );
 });
+
+// Push notification event
+self.addEventListener('push', (event) => {
+  const options = {
+    body: event.data ? event.data.text() : 'New notification from Home Manager',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [200, 100, 200],
+    tag: 'home-manager-notification',
+    requireInteraction: false,
+    actions: [
+      {
+        action: 'open',
+        title: 'Open App'
+      },
+      {
+        action: 'close',
+        title: 'Close'
+      }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification('Home Manager', options)
+  );
+});
+
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'open' || !event.action) {
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        // If app is already open, focus it
+        for (let i = 0; i < clientList.length; i++) {
+          const client = clientList[i];
+          if (client.url === '/' && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // Otherwise open a new window
+        if (clients.openWindow) {
+          return clients.openWindow('/');
+        }
+      })
+    );
+  }
+});
+
+// Background sync for notifications
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-notifications') {
+    event.waitUntil(
+      // This will be handled by the app to check for due items
+      self.registration.showNotification('Home Manager', {
+        body: 'Checking for upcoming items...',
+        icon: '/icon-192.png',
+        tag: 'sync-notification'
+      })
+    );
+  }
+});

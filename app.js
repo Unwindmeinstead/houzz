@@ -12,6 +12,9 @@ class HomeManagerApp {
         this.renderHome();
         this.updateCategoryCounts();
         this.updateNotificationBadge();
+        this.initNotifications();
+        this.checkNotificationPermission();
+        this.startNotificationChecker();
     }
 
     openSettings() {
