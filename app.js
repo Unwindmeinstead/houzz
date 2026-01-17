@@ -2363,6 +2363,7 @@ class HomeManagerApp {
         const insurances = storage.getAll('insurances') || [];
         const savings = storage.getAll('savings') || [];
         const checking = storage.getAll('checking') || [];
+        const subscriptions = storage.getAll('subscriptions') || [];
         
         // Get upcoming tasks (next 7 days)
         const today = new Date();
@@ -2400,6 +2401,19 @@ class HomeManagerApp {
         // Calculate total car loan amount (sum of all amountOwed from cars)
         const totalCarLoan = cars
             .reduce((sum, car) => sum + (parseFloat(car.amountOwed) || 0), 0);
+        
+        // Calculate total monthly subscriptions
+        const totalSubscriptions = subscriptions
+            .reduce((sum, sub) => {
+                const amount = parseFloat(sub.amount) || 0;
+                if (sub.frequency === 'yearly') {
+                    return sum + (amount / 12);
+                } else if (sub.frequency === 'weekly') {
+                    return sum + (amount * 4.33);
+                } else {
+                    return sum + amount;
+                }
+            }, 0);
 
         container.innerHTML = `
             <!-- Summary Cards -->
