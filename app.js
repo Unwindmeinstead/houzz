@@ -4108,6 +4108,22 @@ class HomeManagerApp {
     }
 
     async checkNotificationPermission() {
+        // Check if running on iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        // iOS 16.4+ supports web push notifications, but only for installed PWAs
+        if (isIOS) {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                window.navigator.standalone || 
+                                document.referrer.includes('android-app://');
+            
+            if (!isStandalone) {
+                this.updateNotificationUI('ios-install-required');
+                return;
+            }
+        }
+
         if (!('Notification' in window)) {
             this.updateNotificationUI('not-supported');
             return;
@@ -4134,6 +4150,10 @@ class HomeManagerApp {
             toggleSwitch.checked = false;
             toggleSwitch.disabled = true;
             statusDesc.textContent = 'Notifications are not supported on this device';
+        } else if (permission === 'ios-install-required') {
+            toggleSwitch.checked = false;
+            toggleSwitch.disabled = false;
+            statusDesc.innerHTML = 'Install this app to your home screen to enable notifications on iOS. Tap the share button → "Add to Home Screen"';
         } else {
             toggleSwitch.checked = false;
             statusDesc.textContent = 'Enable notifications for bills, tasks, and reminders';
