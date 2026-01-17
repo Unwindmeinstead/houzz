@@ -514,6 +514,85 @@ class HomeManagerApp {
         });
     }
 
+    setupSwipeGestures() {
+        const mainContent = document.getElementById('main-content-view');
+        if (!mainContent) return;
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        mainContent.addEventListener('touchstart', (e) => {
+            // Don't trigger swipe if touching a scrollable element
+            if (e.target.closest('.calendar-grid') || 
+                e.target.closest('.action-items-list') || 
+                e.target.closest('.recent-updates-list') ||
+                e.target.closest('.tasks-list') ||
+                e.target.closest('.items-grid') ||
+                e.target.closest('.overlay')) {
+                return;
+            }
+            
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        mainContent.addEventListener('touchend', (e) => {
+            // Don't trigger swipe if touching a scrollable element
+            if (e.target.closest('.calendar-grid') || 
+                e.target.closest('.action-items-list') || 
+                e.target.closest('.recent-updates-list') ||
+                e.target.closest('.tasks-list') ||
+                e.target.closest('.items-grid') ||
+                e.target.closest('.overlay')) {
+                return;
+            }
+
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            
+            this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+        }, { passive: true });
+    }
+
+    handleSwipe(startX, startY, endX, endY) {
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const absDeltaX = Math.abs(deltaX);
+        const absDeltaY = Math.abs(deltaY);
+
+        // Check if it's a horizontal swipe (more horizontal than vertical)
+        if (absDeltaX > this.minSwipeDistance && absDeltaX > absDeltaY && absDeltaY < this.maxVerticalDistance) {
+            // Only allow swiping when on home view with tabs
+            if (this.currentView !== 'home') return;
+
+            // Get all tabs in order
+            const tabs = Array.from(document.querySelectorAll('.tab-btn'))
+                .map(btn => btn.getAttribute('data-tab'))
+                .filter(tab => tab);
+
+            if (tabs.length === 0) return;
+
+            // Find current tab index
+            const currentIndex = tabs.indexOf(this.currentTab);
+            if (currentIndex === -1) return;
+
+            // Swipe left = next tab, Swipe right = previous tab
+            if (deltaX < 0) {
+                // Swipe left - go to next tab
+                const nextIndex = (currentIndex + 1) % tabs.length;
+                HapticFeedback.light();
+                this.switchTab(tabs[nextIndex]);
+            } else {
+                // Swipe right - go to previous tab
+                const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+                HapticFeedback.light();
+                this.switchTab(tabs[prevIndex]);
+            }
+        }
+    }
+
     switchTab(tab) {
         if (!tab) return;
         
