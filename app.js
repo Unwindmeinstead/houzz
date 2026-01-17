@@ -61,6 +61,12 @@ class HomeManagerApp {
         this.currentView = 'home';
         this.currentTab = 'main';
         this.editingItem = null;
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        this.minSwipeDistance = 50; // Minimum distance for a swipe
+        this.maxVerticalDistance = 100; // Max vertical movement to still count as horizontal swipe
         this.init();
     }
 
