@@ -1086,6 +1086,7 @@ class HomeManagerApp {
                 'finances': 'finance',
                 'checking': 'finance',
                 'insurances': 'insurances',
+                'subscriptions': 'insurances',
                 'savings': 'home'
             };
             
@@ -1105,13 +1106,25 @@ class HomeManagerApp {
                     if (insurancesTab) {
                         insurancesTab.click();
                     }
+                } else if (category === 'subscriptions') {
+                    const subscriptionsTab = document.querySelector('.tab-btn[data-tab="subscriptions"]');
+                    if (subscriptionsTab) {
+                        subscriptionsTab.click();
+                    }
                 }
             } else if (targetView === 'insurances') {
-                // For insurances, switch to home view and then to insurances tab
+                // For insurances or subscriptions, switch to home view and then to appropriate tab
                 this.switchView('home');
-                const insurancesTab = document.querySelector('.tab-btn[data-tab="insurances"]');
-                if (insurancesTab) {
-                    insurancesTab.click();
+                if (category === 'insurances') {
+                    const insurancesTab = document.querySelector('.tab-btn[data-tab="insurances"]');
+                    if (insurancesTab) {
+                        insurancesTab.click();
+                    }
+                } else if (category === 'subscriptions') {
+                    const subscriptionsTab = document.querySelector('.tab-btn[data-tab="subscriptions"]');
+                    if (subscriptionsTab) {
+                        subscriptionsTab.click();
+                    }
                 }
             } else {
                 this.switchView(targetView);
@@ -1133,6 +1146,8 @@ class HomeManagerApp {
                 this.renderBills();
             } else if (this.currentView === 'insurances') {
                 this.renderInsurances();
+            } else if (this.currentView === 'subscriptions') {
+                this.renderSubscriptions();
             }
         }
         
@@ -1150,7 +1165,9 @@ class HomeManagerApp {
                     const index = parseInt(card.getAttribute('data-index'));
                     const items = category === 'cars' ? storage.getCars() :
                                  category === 'finances' ? storage.getFinances() :
-                                 category === 'bills' ? storage.getBills() : [];
+                                 category === 'bills' ? storage.getBills() :
+                                 category === 'subscriptions' ? storage.getAll('subscriptions') || [] :
+                                 category === 'insurances' ? storage.getAll('insurances') || [] : [];
                     if (items[index]) {
                         this.openAddModal(category, items[index]);
                     }
@@ -1545,6 +1562,8 @@ class HomeManagerApp {
                     this.renderTasks();
                 } else if (activeTab === 'insurances') {
                     this.renderInsurances();
+                } else if (activeTab === 'subscriptions') {
+                    this.renderSubscriptions();
                 }
             } else if (this.currentView === 'tasks') {
                 this.renderTasks();
