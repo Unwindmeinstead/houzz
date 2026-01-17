@@ -3104,6 +3104,40 @@ button, .nav-item, .task-item {
     scroll-behavior: smooth;
 }
 
+/* Mobile optimizations */
+@media (max-width: 480px) {
+    .overlay-content,
+    .slide-container {
+        max-width: 100%;
+        width: calc(100vw - 32px);
+        margin: 0 16px;
+    }
+    
+    .slide {
+        padding: 20px 16px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 14px 16px;
+    }
+    
+    .form-group label {
+        font-size: 14px;
+    }
+    
+    .slide-header {
+        padding: 0 4px;
+        margin-bottom: 20px;
+    }
+    
+    .form-options {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+}
+
 /* PWA specific styles */
 @media (display-mode: standalone) {
     .header {
