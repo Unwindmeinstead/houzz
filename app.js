@@ -148,7 +148,7 @@ class HomeManagerApp {
                         </div>
                     </div>
                     <div class="export-action-section">
-                        <button class="export-action-btn primary" onclick="app.handleExport()">
+                        <button class="export-action-btn primary" onclick="HapticFeedback.medium(); app.handleExport()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="7 10 12 15 17 10"/>
@@ -156,7 +156,7 @@ class HomeManagerApp {
                             </svg>
                             <span>Export</span>
                         </button>
-                        <button class="export-action-btn secondary" onclick="app.handleEmailExport()">
+                        <button class="export-action-btn secondary" onclick="HapticFeedback.medium(); app.handleEmailExport()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                                 <polyline points="22,6 12,13 2,6"/>
@@ -1004,7 +1004,7 @@ class HomeManagerApp {
                     </button>
                 </div>
                 <div class="date-entry-menu-options">
-                    <button class="date-entry-option" onclick="app.openAddModalWithDate('todos', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
+                    <button class="date-entry-option" onclick="HapticFeedback.medium(); app.openAddModalWithDate('todos', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
                         <div class="date-entry-option-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 11l3 3L22 4" />
@@ -1016,7 +1016,7 @@ class HomeManagerApp {
                             <div class="date-entry-option-subtitle">Add a task for this date</div>
                         </div>
                     </button>
-                    <button class="date-entry-option" onclick="app.openAddModalWithDate('bills', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
+                    <button class="date-entry-option" onclick="HapticFeedback.medium(); app.openAddModalWithDate('bills', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
                         <div class="date-entry-option-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
@@ -1030,7 +1030,7 @@ class HomeManagerApp {
                             <div class="date-entry-option-subtitle">Add a bill due on this date</div>
                         </div>
                     </button>
-                    <button class="date-entry-option" onclick="app.openAddModalWithDate('finances', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
+                    <button class="date-entry-option" onclick="HapticFeedback.medium(); app.openAddModalWithDate('finances', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
                         <div class="date-entry-option-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 3v18" />
@@ -1383,7 +1383,7 @@ class HomeManagerApp {
                 <p class="delete-confirm-message">Are you sure you want to clear all recent updates? This will hide all current updates from the list. New updates will still appear.</p>
                 <div class="delete-confirm-actions">
                     <button class="delete-confirm-btn cancel-btn" onclick="this.closest('.delete-confirm-overlay').remove()">Cancel</button>
-                    <button class="delete-confirm-btn delete-btn" onclick="app.clearRecentUpdates(); this.closest('.delete-confirm-overlay').remove();">Clear All</button>
+                    <button class="delete-confirm-btn delete-btn" onclick="HapticFeedback.error(); app.clearRecentUpdates(); this.closest('.delete-confirm-overlay').remove();">Clear All</button>
                 </div>
             </div>
         `;
@@ -1424,7 +1424,7 @@ class HomeManagerApp {
                 <p class="delete-confirm-message">Are you sure you want to mark all action items as done? This will resolve all bills, tasks, and car expirations shown in the action items list.</p>
                 <div class="delete-confirm-actions">
                     <button class="delete-confirm-btn cancel-btn" onclick="this.closest('.delete-confirm-overlay').remove()">Cancel</button>
-                    <button class="delete-confirm-btn delete-btn" onclick="app.clearActionItems(); this.closest('.delete-confirm-overlay').remove();">Clear All</button>
+                    <button class="delete-confirm-btn delete-btn" onclick="HapticFeedback.error(); app.clearActionItems(); this.closest('.delete-confirm-overlay').remove();">Clear All</button>
                 </div>
             </div>
         `;
@@ -2565,7 +2565,7 @@ class HomeManagerApp {
             <div class="home-section">
                 <h2 class="home-section-title">Quick Access</h2>
                 <div class="quick-access-grid">
-                    <button class="quick-access-card" onclick="app.switchView('cars')">
+                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('cars')">
                         <div class="quick-access-icon">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 16v-3l2-5h14l2 5v3" />
@@ -3018,7 +3018,7 @@ class HomeManagerApp {
                         <p class="category-view-subtitle">0 policies</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <button class="tasks-add-btn" onclick="app.openAddModal('insurances')" title="Add Insurance">
+                        <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('insurances')" title="Add Insurance">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M12 8v8" />
@@ -3084,7 +3084,7 @@ class HomeManagerApp {
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
-                    <button class="tasks-add-btn" onclick="app.openAddModal('insurances')" title="Add Insurance">
+                    <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('insurances')" title="Add Insurance">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 8v8" />
@@ -3160,7 +3160,7 @@ class HomeManagerApp {
                                     <div class="item-card-badge" style="background: ${typeColor}20; border-color: ${typeColor}40; color: ${typeColor}">
                                         ${typeDisplay}
                                     </div>
-                                    <button class="item-delete-btn" data-category="insurances" data-item-id="${insurance.id}" onclick="event.stopPropagation(); app.confirmDelete('insurances', '${insurance.id}', '${(insurance.provider || 'Insurance').replace(/'/g, "\\'")}')" title="Delete">
+                                    <button class="item-delete-btn" data-category="insurances" data-item-id="${insurance.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('insurances', '${insurance.id}', '${(insurance.provider || 'Insurance').replace(/'/g, "\\'")}')" title="Delete">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 6h18"/>
                                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
@@ -3239,7 +3239,7 @@ class HomeManagerApp {
                     <h2 class="category-view-title">Tasks</h2>
                     <p class="category-view-subtitle">${todos.length} task${todos.length !== 1 ? 's' : ''}</p>
                 </div>
-                <button class="tasks-add-btn" onclick="app.openAddModal('todos')" title="Add Task">
+                <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('todos')" title="Add Task">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="9" />
                         <path d="M12 8v8" />
@@ -3322,7 +3322,7 @@ class HomeManagerApp {
                         <h2 class="category-view-title">Tasks</h2>
                         <p class="category-view-subtitle">0 tasks</p>
                     </div>
-                    <button class="tasks-add-btn" onclick="app.openAddModal('todos')" title="Add Task">
+                    <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('todos')" title="Add Task">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 8v8" />
@@ -3592,7 +3592,7 @@ class HomeManagerApp {
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         ${this.renderViewToggle()}
-                        <button class="tasks-add-btn" onclick="app.openAddModal('cars')" title="Add Car">
+                        <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('cars')" title="Add Car">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M12 8v8" />
@@ -3627,7 +3627,7 @@ class HomeManagerApp {
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
-                    <button class="tasks-add-btn" onclick="app.openAddModal('cars')" title="Add Car">
+                    <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('cars')" title="Add Car">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 8v8" />
@@ -3669,7 +3669,7 @@ class HomeManagerApp {
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div class="item-card-badge">Vehicle</div>
-                                <button class="item-delete-btn" data-category="cars" data-item-id="${car.id}" onclick="event.stopPropagation(); app.confirmDelete('cars', '${car.id}', '${(car.make || '') + ' ' + (car.model || '')}')" title="Delete">
+                                <button class="item-delete-btn" data-category="cars" data-item-id="${car.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('cars', '${car.id}', '${(car.make || '') + ' ' + (car.model || '')}')" title="Delete">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M3 6h18"/>
                                         <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
@@ -3819,7 +3819,7 @@ class HomeManagerApp {
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         ${this.renderViewToggle()}
-                        <button class="tasks-add-btn" onclick="app.openAddModal('finances')" title="Add Finance">
+                        <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('finances')" title="Add Finance">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M12 8v8" />
@@ -3858,7 +3858,7 @@ class HomeManagerApp {
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
-                    <button class="tasks-add-btn" onclick="app.openAddModal('finances')" title="Add Finance">
+                    <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('finances')" title="Add Finance">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 8v8" />
@@ -3894,7 +3894,7 @@ class HomeManagerApp {
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="item-card-badge finance-category-badge" data-category="${financeCategory}">${categoryDisplay}</div>
                                     <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
-                                    <button class="item-delete-btn" data-category="finances" data-item-id="${finance.id}" onclick="event.stopPropagation(); app.confirmDelete('finances', '${finance.id}', '${(finance.description || categoryDisplay).replace(/'/g, "\\'")}')" title="Delete">
+                                    <button class="item-delete-btn" data-category="finances" data-item-id="${finance.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('finances', '${finance.id}', '${(finance.description || categoryDisplay).replace(/'/g, "\\'")}')" title="Delete">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 6h18"/>
                                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
@@ -3933,7 +3933,7 @@ class HomeManagerApp {
                         <p class="category-view-subtitle">0 subscriptions</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <button class="tasks-add-btn" onclick="app.openAddModal('subscriptions')" title="Add Subscription">
+                        <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('subscriptions')" title="Add Subscription">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M12 8v8" />
@@ -3968,7 +3968,7 @@ class HomeManagerApp {
                     <p class="category-view-subtitle">${subscriptions.length} subscription${subscriptions.length !== 1 ? 's' : ''}</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="tasks-add-btn" onclick="app.openAddModal('subscriptions')" title="Add Subscription">
+                    <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('subscriptions')" title="Add Subscription">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 8v8" />
@@ -3996,7 +3996,7 @@ class HomeManagerApp {
                                         Auto-renew
                                     </div>
                                     ` : ''}
-                                    <button class="item-delete-btn" data-category="subscriptions" data-item-id="${subscription.id}" onclick="event.stopPropagation(); app.confirmDelete('subscriptions', '${subscription.id}', '${(subscription.name || 'Subscription').replace(/'/g, "\\'")}')" title="Delete">
+                                    <button class="item-delete-btn" data-category="subscriptions" data-item-id="${subscription.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('subscriptions', '${subscription.id}', '${(subscription.name || 'Subscription').replace(/'/g, "\\'")}')" title="Delete">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 6h18"/>
                                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
@@ -4047,7 +4047,7 @@ class HomeManagerApp {
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         ${this.renderViewToggle()}
-                        <button class="tasks-add-btn" onclick="app.openAddModal('bills')" title="Add Bill">
+                        <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('bills')" title="Add Bill">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M12 8v8" />
@@ -4085,7 +4085,7 @@ class HomeManagerApp {
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
-                    <button class="tasks-add-btn" onclick="app.openAddModal('bills')" title="Add Bill">
+                    <button class="tasks-add-btn" onclick="HapticFeedback.medium(); app.openAddModal('bills')" title="Add Bill">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 8v8" />
@@ -4114,7 +4114,7 @@ class HomeManagerApp {
                                     <div class="item-card-badge" style="${isOverdue ? 'background: rgba(248, 113, 113, 0.2); border-color: #f87171; color: #f87171;' : isDueSoon ? 'background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24;' : bill.paid ? 'background: rgba(74, 222, 128, 0.2); border-color: #4ade80; color: #4ade80;' : ''}">
                                         ${bill.paid ? 'Paid' : isOverdue ? 'Overdue' : isDueSoon ? 'Due Soon' : 'Pending'}
                                     </div>
-                                    <button class="item-delete-btn" data-category="bills" data-item-id="${bill.id}" onclick="event.stopPropagation(); app.confirmDelete('bills', '${bill.id}', '${(bill.name || 'Bill').replace(/'/g, "\\'")}')" title="Delete">
+                                    <button class="item-delete-btn" data-category="bills" data-item-id="${bill.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('bills', '${bill.id}', '${(bill.name || 'Bill').replace(/'/g, "\\'")}')" title="Delete">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 6h18"/>
                                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
