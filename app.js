@@ -2577,7 +2577,7 @@ class HomeManagerApp {
                         <div class="quick-access-label">Cars</div>
                         <div class="quick-access-count">${counts.cars}</div>
                     </button>
-                    <button class="quick-access-card" onclick="app.switchView('finance')">
+                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('finance')">
                         <div class="quick-access-icon">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 3v18" />
@@ -2587,7 +2587,7 @@ class HomeManagerApp {
                         <div class="quick-access-label">Finance</div>
                         <div class="quick-access-count">${counts.finances}</div>
                     </button>
-                    <button class="quick-access-card" onclick="app.switchView('bills')">
+                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('bills')">
                         <div class="quick-access-icon">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
@@ -2599,7 +2599,7 @@ class HomeManagerApp {
                         <div class="quick-access-label">Bills</div>
                         <div class="quick-access-count">${counts.bills}</div>
                     </button>
-                    <button class="quick-access-card" onclick="app.openAddModal()">
+                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.openAddModal()">
                         <div class="quick-access-icon">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="9" />
@@ -2647,14 +2647,14 @@ class HomeManagerApp {
                                     <div class="action-item-subtitle">${item.subtitle}</div>
                                 </div>
                                 <div class="action-item-actions">
-                                    <button class="action-item-btn" onclick="app.createTaskFromAction('${item.type}', '${item.id}')" title="Create Task">
+                                    <button class="action-item-btn" onclick="HapticFeedback.medium(); app.createTaskFromAction('${item.type}', '${item.id}')" title="Create Task">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <circle cx="12" cy="12" r="9" />
                                             <path d="M12 8v8" />
                                             <path d="M8 12h8" />
                                         </svg>
                                     </button>
-                                    <button class="action-item-btn action-item-done-btn" onclick="app.markActionItemDone('${item.type}', '${item.id}')" title="Mark as Done">
+                                    <button class="action-item-btn action-item-done-btn" onclick="HapticFeedback.success(); app.markActionItemDone('${item.type}', '${item.id}')" title="Mark as Done">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M20 6L9 17l-5-5"/>
                                         </svg>
@@ -2918,7 +2918,7 @@ class HomeManagerApp {
             <div class="home-section">
                 <h2 class="home-section-title">All Categories</h2>
                 <div class="category-cards-grid">
-                    <button class="category-card" onclick="app.openAddModal('todos')">
+                    <button class="category-card" onclick="HapticFeedback.medium(); app.openAddModal('todos')">
                         <div class="category-card-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 11l3 3L22 4" />
@@ -2930,7 +2930,7 @@ class HomeManagerApp {
                             <div class="category-card-count">${counts.todos} items</div>
                         </div>
                     </button>
-                    <button class="category-card" onclick="app.switchView('cars')">
+                    <button class="category-card" onclick="HapticFeedback.medium(); app.switchView('cars')">
                         <div class="category-card-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 16v-3l2-5h14l2 5v3" />
@@ -2944,7 +2944,7 @@ class HomeManagerApp {
                             <div class="category-card-count">${counts.cars} items</div>
                         </div>
                     </button>
-                    <button class="category-card" onclick="app.switchView('bills')">
+                    <button class="category-card" onclick="HapticFeedback.medium(); app.switchView('bills')">
                         <div class="category-card-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
@@ -2958,7 +2958,7 @@ class HomeManagerApp {
                             <div class="category-card-count">${counts.bills} items</div>
                         </div>
                     </button>
-                    <button class="category-card" onclick="app.openAddModal('insurances')">
+                    <button class="category-card" onclick="HapticFeedback.medium(); app.openAddModal('insurances')">
                         <div class="category-card-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -2970,7 +2970,7 @@ class HomeManagerApp {
                             <div class="category-card-count">${counts.insurances} items</div>
                         </div>
                     </button>
-                    <button class="category-card" onclick="app.switchView('finance')">
+                    <button class="category-card" onclick="HapticFeedback.medium(); app.switchView('finance')">
                         <div class="category-card-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 3v18" />
@@ -2982,7 +2982,7 @@ class HomeManagerApp {
                             <div class="category-card-count">${counts.finances} items</div>
                         </div>
                     </button>
-                    <button class="category-card" onclick="app.openAddModal('savings')">
+                    <button class="category-card" onclick="HapticFeedback.medium(); app.openAddModal('savings')">
                         <div class="category-card-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10" />
