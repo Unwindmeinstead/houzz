@@ -339,12 +339,17 @@ class HomeManagerApp {
     }
 
     setupEventListeners() {
-        // Tab switching
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tab = e.target.getAttribute('data-tab');
-                this.switchTab(tab);
-            });
+        // Tab switching - use event delegation for better reliability
+        document.addEventListener('click', (e) => {
+            const tabBtn = e.target.closest('.tab-btn');
+            if (tabBtn) {
+                const tab = tabBtn.getAttribute('data-tab');
+                if (tab) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.switchTab(tab);
+                }
+            }
         });
 
         // View switching (bottom nav)
@@ -437,22 +442,43 @@ class HomeManagerApp {
     }
 
     switchTab(tab) {
+        if (!tab) return;
+        
         this.currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
         });
         
-        // If on home view and switching tabs, render appropriate content
-        if (this.currentView === 'home') {
-            if (tab === 'main') {
-                this.renderHome();
-            } else if (tab === 'tasks') {
-                this.renderTasks();
-            } else if (tab === 'insurances') {
-                this.renderInsurances();
-            } else if (tab === 'categories') {
-                this.renderCategories();
+        // Always switch to home view first - tabs are part of home view
+        if (this.currentView !== 'home') {
+            this.currentView = 'home';
+            
+            // Hide all content views
+            document.querySelectorAll('.content-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Show home view
+            const homeView = document.getElementById('home-view');
+            if (homeView) {
+                homeView.classList.add('active');
             }
+            
+            // Update bottom navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.getAttribute('data-view') === 'home');
+            });
+        }
+        
+        // Render appropriate content based on tab
+        if (tab === 'main') {
+            this.renderHome();
+        } else if (tab === 'tasks') {
+            this.renderTasks();
+        } else if (tab === 'insurances') {
+            this.renderInsurances();
+        } else if (tab === 'categories') {
+            this.renderCategories();
         }
     }
 

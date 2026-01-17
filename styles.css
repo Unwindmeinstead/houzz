@@ -90,8 +90,10 @@ body {
     scrollbar-width: none;
     -ms-overflow-style: none;
     min-width: 0;
-    touch-action: pan-x;
+    touch-action: pan-x pinch-zoom;
     scroll-behavior: smooth;
+    position: relative;
+    z-index: 101;
 }
 
 .header-tabs::-webkit-scrollbar {
@@ -111,6 +113,11 @@ body {
     -webkit-tap-highlight-color: transparent;
     flex-shrink: 0;
     white-space: nowrap;
+    position: relative;
+    z-index: 102;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .tab-btn.active {
@@ -1832,7 +1839,6 @@ body {
 /* Category View Cards */
 .category-view-header {
     padding: 20px 16px 16px;
-    border-bottom: 1px solid var(--border-gray);
     margin-bottom: 16px;
     display: flex;
     align-items: flex-start;
