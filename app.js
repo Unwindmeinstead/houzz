@@ -20,6 +20,8 @@ class HomeManagerApp {
     openSettings() {
         const overlay = document.getElementById('settings-overlay');
         overlay.classList.add('active');
+        // Update notification UI when opening settings
+        this.checkNotificationPermission();
     }
 
     closeSettings() {
