@@ -1,3 +1,60 @@
+// Haptic Feedback Utility
+const HapticFeedback = {
+    // Light impact (for taps)
+    light() {
+        if (window.TapticEngine) {
+            window.TapticEngine.impact({ style: 'light' });
+        } else if (navigator.vibrate) {
+            navigator.vibrate(10);
+        }
+    },
+    
+    // Medium impact (for button presses)
+    medium() {
+        if (window.TapticEngine) {
+            window.TapticEngine.impact({ style: 'medium' });
+        } else if (navigator.vibrate) {
+            navigator.vibrate(20);
+        }
+    },
+    
+    // Heavy impact (for important actions)
+    heavy() {
+        if (window.TapticEngine) {
+            window.TapticEngine.impact({ style: 'heavy' });
+        } else if (navigator.vibrate) {
+            navigator.vibrate(30);
+        }
+    },
+    
+    // Success feedback
+    success() {
+        if (window.TapticEngine) {
+            window.TapticEngine.notification({ type: 'success' });
+        } else if (navigator.vibrate) {
+            navigator.vibrate([20, 10, 20]);
+        }
+    },
+    
+    // Warning feedback
+    warning() {
+        if (window.TapticEngine) {
+            window.TapticEngine.notification({ type: 'warning' });
+        } else if (navigator.vibrate) {
+            navigator.vibrate([30, 10, 30]);
+        }
+    },
+    
+    // Error feedback
+    error() {
+        if (window.TapticEngine) {
+            window.TapticEngine.notification({ type: 'error' });
+        } else if (navigator.vibrate) {
+            navigator.vibrate([40, 20, 40, 20, 40]);
+        }
+    }
+};
+
 // Main App Logic
 class HomeManagerApp {
     constructor() {
@@ -390,6 +447,7 @@ class HomeManagerApp {
 
         // Close settings
         document.getElementById('close-settings')?.addEventListener('click', () => {
+            HapticFeedback.light();
             this.closeSettings();
         });
 
@@ -1546,6 +1604,7 @@ class HomeManagerApp {
     }
 
     deleteItem(category, id) {
+        HapticFeedback.medium();
         // Delete from storage
         const success = storage.delete(category, id);
         
@@ -3450,6 +3509,7 @@ class HomeManagerApp {
         `;
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            HapticFeedback.warning();
             this.confirmDelete('todos', task.id, task.title || 'Task');
         });
         
@@ -4161,6 +4221,7 @@ class HomeManagerApp {
     }
 
     async toggleNotificationsSwitch() {
+        HapticFeedback.light();
         const toggleSwitch = document.getElementById('notification-toggle-switch');
         if (!toggleSwitch) return;
 
@@ -4250,6 +4311,7 @@ class HomeManagerApp {
     }
 
     async sendTestNotification() {
+        HapticFeedback.medium();
         if (Notification.permission !== 'granted') {
             await this.toggleNotifications();
             if (Notification.permission !== 'granted') {
