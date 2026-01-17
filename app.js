@@ -4092,6 +4092,201 @@ class HomeManagerApp {
         `;
         this.setupCardClickHandlers();
     }
+
+    // Notification Management
+    async initNotifications() {
+        if ('serviceWorker' in navigator && 'Notification' in window) {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                this.swRegistration = registration;
+            } catch (error) {
+                console.error('Service Worker registration error:', error);
+            }
+        }
+    }
+
+    async checkNotificationPermission() {
+        if (!('Notification' in window)) {
+            this.updateNotificationUI('not-supported');
+            return;
+        }
+
+        const permission = Notification.permission;
+        this.updateNotificationUI(permission);
+    }
+
+    updateNotificationUI(permission) {
+        const toggleBtn = document.getElementById('notification-toggle-btn');
+        const toggleText = document.getElementById('notification-toggle-text');
+        const statusDesc = document.getElementById('notification-status');
+
+        if (!toggleBtn || !toggleText || !statusDesc) return;
+
+        if (permission === 'granted') {
+            toggleText.textContent = 'Disable';
+            statusDesc.textContent = 'Notifications are enabled';
+            toggleBtn.style.background = 'rgba(74, 222, 128, 0.15)';
+            toggleBtn.style.borderColor = 'rgba(74, 222, 128, 0.3)';
+            toggleBtn.style.color = '#4ade80';
+        } else if (permission === 'denied') {
+            toggleText.textContent = 'Blocked';
+            statusDesc.textContent = 'Notifications are blocked. Please enable in browser settings.';
+            toggleBtn.style.background = 'rgba(239, 68, 68, 0.15)';
+            toggleBtn.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+            toggleBtn.style.color = '#ef4444';
+        } else if (permission === 'not-supported') {
+            toggleText.textContent = 'Not Supported';
+            statusDesc.textContent = 'Notifications are not supported on this device';
+            toggleBtn.disabled = true;
+        } else {
+            toggleText.textContent = 'Enable';
+            statusDesc.textContent = 'Enable notifications for bills, tasks, and reminders';
+            toggleBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+            toggleBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            toggleBtn.style.color = 'var(--text-white)';
+        }
+    }
+
+    async toggleNotifications() {
+        if (!('Notification' in window)) {
+            alert('Notifications are not supported on this device.');
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            // Disable notifications (just revoke permission - user can re-enable)
+            const confirmed = confirm('Disable notifications? You can re-enable them later in settings.');
+            if (confirmed) {
+                // Note: We can't actually revoke permission, but we can stop sending notifications
+                localStorage.setItem('notificationsEnabled', 'false');
+                this.updateNotificationUI('default');
+            }
+        } else if (Notification.permission === 'default') {
+            // Request permission
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                localStorage.setItem('notificationsEnabled', 'true');
+                this.updateNotificationUI('granted');
+                
+                // Try to subscribe to push notifications
+                if (this.swRegistration) {
+                    try {
+                        const subscription = await this.swRegistration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: this.urlBase64ToUint8Array(this.getVapidPublicKey())
+                        });
+                        console.log('Push subscription:', subscription);
+                    } catch (error) {
+                        console.log('Push subscription failed (using local notifications):', error);
+                    }
+                }
+            } else {
+                this.updateNotificationUI('denied');
+            }
+        } else {
+            alert('Notifications are blocked. Please enable them in your browser settings.');
+        }
+    }
+
+    async sendTestNotification() {
+        if (Notification.permission !== 'granted') {
+            await this.toggleNotifications();
+            if (Notification.permission !== 'granted') {
+                return;
+            }
+        }
+
+        const options = {
+            body: 'This is a test notification from Home Manager. If you see this, notifications are working!',
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            vibrate: [200, 100, 200],
+            tag: 'test-notification',
+            requireInteraction: false
+        };
+
+        if (this.swRegistration) {
+            this.swRegistration.showNotification('Home Manager - Test', options);
+        } else if ('Notification' in window) {
+            new Notification('Home Manager - Test', options);
+        }
+    }
+
+    checkAndSendNotifications() {
+        if (Notification.permission !== 'granted') return;
+        if (localStorage.getItem('notificationsEnabled') === 'false') return;
+
+        const actionItems = this.getActionItems();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        actionItems.forEach(item => {
+            const notificationKey = `notified-${item.type}-${item.id}`;
+            const lastNotified = localStorage.getItem(notificationKey);
+            const lastNotifiedDate = lastNotified ? new Date(lastNotified) : null;
+
+            // Only send notification if we haven't notified today
+            if (!lastNotifiedDate || lastNotifiedDate.toDateString() !== today.toDateString()) {
+                this.sendActionItemNotification(item);
+                localStorage.setItem(notificationKey, today.toISOString());
+            }
+        });
+    }
+
+    sendActionItemNotification(item) {
+        const options = {
+            body: item.subtitle || 'Action required',
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            vibrate: item.urgent ? [200, 100, 200, 100, 200] : [200, 100, 200],
+            tag: `action-item-${item.type}-${item.id}`,
+            requireInteraction: item.urgent,
+            data: {
+                type: item.type,
+                id: item.id,
+                url: '/'
+            }
+        };
+
+        if (this.swRegistration) {
+            this.swRegistration.showNotification(item.title, options);
+        } else if ('Notification' in window) {
+            new Notification(item.title, options);
+        }
+    }
+
+    startNotificationChecker() {
+        // Check for notifications every hour
+        setInterval(() => {
+            this.checkAndSendNotifications();
+        }, 60 * 60 * 1000); // 1 hour
+
+        // Also check immediately
+        setTimeout(() => {
+            this.checkAndSendNotifications();
+        }, 5000); // After 5 seconds
+    }
+
+    getVapidPublicKey() {
+        // For now, return a placeholder. In production, you'd use a real VAPID key from a push service
+        // You can generate one at https://web-push-codelab.glitch.me/
+        return 'BEl62iUYgUivxIkv69yViEuiBIa40HI8vU8vK8vK8vK8vK8vK8vK8vK8vK8vK8vK8vK8vK8vK8vK8';
+    }
+
+    urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
 }
 
 // Initialize app
