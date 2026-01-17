@@ -415,10 +415,14 @@ class HomeManagerApp {
                 if (tab) {
                     e.preventDefault();
                     e.stopPropagation();
+                    HapticFeedback.light();
                     this.switchTab(tab);
                 }
             }
         });
+
+        // Swipe gesture detection for tab switching
+        this.setupSwipeGestures();
 
         // View switching (bottom nav)
         document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
