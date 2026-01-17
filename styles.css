@@ -55,6 +55,8 @@ body {
     z-index: 100;
     border-bottom: 1px solid var(--border-gray);
     gap: 12px;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
 }
 
 .header > .notifications-btn {
@@ -82,6 +84,18 @@ body {
     gap: 8px;
     flex: 1;
     justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    min-width: 0;
+    touch-action: pan-x;
+    scroll-behavior: smooth;
+}
+
+.header-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .tab-btn {
@@ -95,6 +109,8 @@ body {
     border-radius: 8px;
     transition: all 0.2s;
     -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .tab-btn.active {
