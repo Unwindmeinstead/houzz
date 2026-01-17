@@ -3106,11 +3106,17 @@ button, .nav-item, .task-item {
 
 /* Mobile optimizations */
 @media (max-width: 480px) {
+    .overlay {
+        padding: 16px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+    
     .overlay-content,
     .slide-container {
         max-width: 100%;
-        width: calc(100vw - 32px);
-        margin: 0 16px;
+        width: 100%;
+        margin: 0;
     }
     
     .slide {
@@ -3121,6 +3127,8 @@ button, .nav-item, .task-item {
     .form-group select {
         font-size: 16px; /* Prevents zoom on iOS */
         padding: 14px 16px;
+        width: 100%;
+        max-width: 100%;
     }
     
     .form-group label {
@@ -3135,6 +3143,11 @@ button, .nav-item, .task-item {
     .form-options {
         gap: 12px;
         margin-bottom: 20px;
+    }
+    
+    .submit-btn {
+        width: 100%;
+        max-width: 100%;
     }
 }
 

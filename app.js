@@ -2551,12 +2551,13 @@ class HomeManagerApp {
             <!-- Recent Updates -->
             ${(() => {
                 const recentActivity = this.getRecentActivity();
-                return recentActivity.length > 0 ? `
+                const isCollapsed = recentActivity.length === 0 || localStorage.getItem('recentUpdatesCollapsed') === 'true';
+                return `
                 <div class="home-section">
                     <h2 class="home-section-title collapsible-title">
                         <span onclick="app.toggleRecentUpdatesSection()" style="flex: 1; display: flex; align-items: center; gap: 8px;">
                             <span>Recent Updates</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-indicator" id="recent-updates-indicator">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-indicator" id="recent-updates-indicator" style="transform: ${isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'};">
                                 <path d="M6 9l6 6 6-6"/>
                             </svg>
                         </span>
@@ -2570,9 +2571,9 @@ class HomeManagerApp {
                         </button>
                         ` : ''}
                     </h2>
-                    <div class="recent-updates-container" id="recent-updates-container">
-                        <div class="recent-updates-list" id="recent-updates-list">
-                            ${recentActivity.map((activity, index) => {
+                    <div class="recent-updates-container" id="recent-updates-container" ${isCollapsed ? 'class="recent-updates-container collapsed"' : ''}>
+                        <div class="recent-updates-list" id="recent-updates-list" ${isCollapsed ? 'class="recent-updates-list"' : 'class="recent-updates-list expanded"'}>
+                            ${recentActivity.length > 0 ? recentActivity.map((activity, index) => {
                             const timeAgo = this.getTimeAgo(activity.timestamp);
                             let title = '';
                             let subtitle = '';
