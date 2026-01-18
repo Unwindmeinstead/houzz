@@ -2987,11 +2987,6 @@ class HomeManagerApp {
                 <div class="metrics-carousel" id="metrics-carousel">
                     <div class="metric-slide active" data-index="0">
                         <div class="metric-display">
-                            <div class="metric-icon-large" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                </svg>
-                            </div>
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${totalCheckingBalance.toFixed(0)}</div>
                                 <div class="metric-label-large">Checking Balance</div>
@@ -3000,12 +2995,6 @@ class HomeManagerApp {
                     </div>
                     <div class="metric-slide" data-index="1">
                         <div class="metric-display">
-                            <div class="metric-icon-large" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                    <circle cx="12" cy="12" r="2"/>
-                                </svg>
-                            </div>
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${totalSavingsBalance.toFixed(0)}</div>
                                 <div class="metric-label-large">Savings Balance</div>
@@ -3014,13 +3003,6 @@ class HomeManagerApp {
                     </div>
                     <div class="metric-slide" data-index="2">
                         <div class="metric-display">
-                            <div class="metric-icon-large" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="8" cy="21" r="1"/>
-                                    <circle cx="19" cy="21" r="1"/>
-                                    <path d="m2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-                                </svg>
-                            </div>
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${monthlySubscriptions.toFixed(0)}</div>
                                 <div class="metric-label-large">Monthly Subscriptions</div>
@@ -3029,12 +3011,6 @@ class HomeManagerApp {
                     </div>
                     <div class="metric-slide" data-index="3">
                         <div class="metric-display">
-                            <div class="metric-icon-large" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                    <path d="M9 12l2 2 4-4"/>
-                                </svg>
-                            </div>
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${monthlyInsurancePremiums.toFixed(0)}</div>
                                 <div class="metric-label-large">Insurance Premiums</div>
@@ -3043,14 +3019,6 @@ class HomeManagerApp {
                     </div>
                     <div class="metric-slide" data-index="4">
                         <div class="metric-display">
-                            <div class="metric-icon-large" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/>
-                                    <path d="M9 8h6"/>
-                                    <path d="M9 12h6"/>
-                                    <path d="M9 16h4"/>
-                                </svg>
-                            </div>
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${totalUnpaidBills.toFixed(0)}</div>
                                 <div class="metric-label-large">Bills Due</div>
@@ -3059,13 +3027,6 @@ class HomeManagerApp {
                     </div>
                     <div class="metric-slide" data-index="5">
                         <div class="metric-display">
-                            <div class="metric-icon-large" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                    <path d="M8 10l4 4"/>
-                                    <path d="M16 14l-4-4"/>
-                                </svg>
-                            </div>
                             <div class="metric-content-large">
                                 <div class="metric-value-large" style="color: ${netWorth >= 0 ? '#22c55e' : '#ef4444'};">$${netWorth.toFixed(0)}</div>
                                 <div class="metric-label-large">Net Worth</div>
