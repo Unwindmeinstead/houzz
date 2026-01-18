@@ -74,23 +74,26 @@ class HomeManagerApp {
     }
 
     init() {
-        // Only check PIN if protection is explicitly enabled
+        // Read PIN state directly from localStorage
         const pinEnabled = localStorage.getItem('pinEnabled');
         const pinHash = localStorage.getItem('pinHash');
         
-        // Show PIN entry only if PIN is enabled AND hash exists
+        // Show PIN entry ONLY if PIN is explicitly enabled ('true') AND hash exists
         if (pinEnabled === 'true' && pinHash) {
             this.showPinEntry();
             return; // Don't initialize app until PIN is entered
         }
         
-        // If PIN is disabled, ensure it's properly cleared
-        if (pinEnabled === 'false' || !pinEnabled) {
-            // Make sure PIN entry overlay is hidden
-            const pinOverlay = document.getElementById('pin-entry-overlay');
-            if (pinOverlay) {
-                pinOverlay.style.display = 'none';
-            }
+        // PIN is disabled or not set - ensure overlay is hidden and continue initialization
+        const pinOverlay = document.getElementById('pin-entry-overlay');
+        if (pinOverlay) {
+            pinOverlay.style.display = 'none';
+        }
+        
+        // If PIN is disabled but hash exists, clear the disabled state to prevent confusion
+        if (pinEnabled === 'false' && pinHash) {
+            // Keep hash but ensure state is clear
+            // Don't clear hash in case user wants to re-enable later
         }
         
         this.setupEventListeners();
@@ -5124,7 +5127,11 @@ class HomeManagerApp {
         
         if (!toggleSwitch || !statusDesc) return;
 
-        if (this.isPinEnabled()) {
+        // Read directly from localStorage to ensure accuracy
+        const pinEnabled = localStorage.getItem('pinEnabled') === 'true';
+        const pinHash = localStorage.getItem('pinHash');
+
+        if (pinEnabled && pinHash) {
             toggleSwitch.checked = true;
             statusDesc.textContent = 'PIN protection is enabled';
             if (setupOption) setupOption.style.display = 'flex';
@@ -5132,6 +5139,11 @@ class HomeManagerApp {
             toggleSwitch.checked = false;
             statusDesc.textContent = 'Protect your app with a PIN code';
             if (setupOption) setupOption.style.display = 'none';
+            // If PIN is disabled, ensure overlay is hidden
+            const pinOverlay = document.getElementById('pin-entry-overlay');
+            if (pinOverlay) {
+                pinOverlay.style.display = 'none';
+            }
         }
     }
 }
