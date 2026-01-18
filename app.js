@@ -5146,11 +5146,12 @@ class HomeManagerApp {
         
         if (!toggleSwitch || !statusDesc) return;
 
-        // Read directly from localStorage to ensure accuracy
-        const pinEnabled = localStorage.getItem('pinEnabled') === 'true';
+        // Read directly from localStorage - use same logic as init()
+        const pinEnabled = localStorage.getItem('pinEnabled');
         const pinHash = localStorage.getItem('pinHash');
+        const isPinEnabled = pinEnabled === 'true' && pinHash;
 
-        if (pinEnabled && pinHash) {
+        if (isPinEnabled) {
             toggleSwitch.checked = true;
             statusDesc.textContent = 'PIN protection is enabled';
             if (setupOption) setupOption.style.display = 'flex';
@@ -5162,6 +5163,10 @@ class HomeManagerApp {
             const pinOverlay = document.getElementById('pin-entry-overlay');
             if (pinOverlay) {
                 pinOverlay.style.display = 'none';
+            }
+            // Ensure state is explicitly set to 'false' if not already set
+            if (pinEnabled !== 'false') {
+                localStorage.setItem('pinEnabled', 'false');
             }
         }
     }
