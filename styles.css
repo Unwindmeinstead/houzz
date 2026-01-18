@@ -2982,6 +2982,8 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    min-width: fit-content;
 }
 
 .settings-action-btn:hover {
