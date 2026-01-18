@@ -1346,6 +1346,14 @@ class HomeManagerApp {
             storage.add(category, itemData);
         }
 
+        // If this is a financial entry, refresh the home view to update metrics card
+        if (category === 'finances') {
+            // Delay slightly to ensure data is saved
+            setTimeout(() => {
+                this.renderHome();
+            }, 100);
+        }
+
         this.closeOverlay();
         
         // If adding a new item (not editing), navigate to the relevant view
