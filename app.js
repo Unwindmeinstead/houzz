@@ -1192,7 +1192,7 @@ class HomeManagerApp {
                 <div class="date-entry-menu-header">
                     <h3 class="date-entry-menu-title">${existingItems && existingItems.length > 0 ? 'Entries for' : 'Add Entry for'}</h3>
                     <p class="date-entry-menu-date">${formattedDate}</p>
-                    <button class="date-entry-menu-close" onclick="HapticFeedback.light(); this.closest('.date-entry-menu-overlay').remove();">
+                    <button class="date-entry-menu-close" onclick="event.stopPropagation(); HapticFeedback.light(); this.closest('.date-entry-menu-overlay').remove();">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/>
                             <line x1="6" y1="6" x2="18" y2="18"/>
