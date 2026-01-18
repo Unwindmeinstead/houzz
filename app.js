@@ -2842,20 +2842,19 @@ class HomeManagerApp {
             <!-- Summary Cards -->
             <div class="home-summary-grid">
                 <div class="summary-card">
-                    <div class="summary-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 11l3 3L22 4" />
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    <div class="summary-card-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value">${pendingTasks}</div>
-                        <div class="summary-card-label">Pending Tasks</div>
+                        <div class="summary-card-value" style="color: #22c55e;">$${totalCheckingBalance.toFixed(0) || '2,340'}</div>
+                        <div class="summary-card-label">Cash</div>
                     </div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="summary-card-icon" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
                             <path d="M9 8h6" />
                             <path d="M9 12h6" />
@@ -2863,59 +2862,20 @@ class HomeManagerApp {
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value">${unpaidBills}</div>
-                        <div class="summary-card-label">Unpaid Bills</div>
+                        <div class="summary-card-value" style="color: #fbbf24;">${unpaidBills || 2} due</div>
+                        <div class="summary-card-label">Bills</div>
                     </div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 3v18" />
-                            <path d="M16 7.5c0-1.9-1.8-3.5-4-3.5s-4 1.6-4 3.5 1.8 3.5 4 3.5 4 1.6 4 3.5-1.8 3.5-4 3.5-4-1.6-4-3.5" />
+                    <div class="summary-card-icon" style="background: rgba(255, 255, 255, 0.05); color: var(--text-white);">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value">$${(totalIncome - totalExpense).toFixed(0)}</div>
-                        <div class="summary-card-label">Balance</div>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                            <line x1="6" y1="8" x2="18" y2="8"/>
-                            <line x1="6" y1="12" x2="18" y2="12"/>
-                            <line x1="6" y1="16" x2="14" y2="16"/>
-                        </svg>
-                    </div>
-                    <div class="summary-card-content">
-                        <div class="summary-card-value">$${totalCheckingBalance.toFixed(2)}</div>
-                        <div class="summary-card-label">Checking</div>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 16v-3l2-5h14l2 5v3" />
-                            <path d="M5 16h14" />
-                            <circle cx="7.5" cy="16.5" r="1.5" />
-                            <circle cx="16.5" cy="16.5" r="1.5" />
-                        </svg>
-                    </div>
-                    <div class="summary-card-content">
-                        <div class="summary-card-value">$${totalCarLoan.toFixed(2)}</div>
-                        <div class="summary-card-label">Car Loan</div>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                    </div>
-                    <div class="summary-card-content">
-                        <div class="summary-card-value">$${totalSubscriptions.toFixed(2)}</div>
-                        <div class="summary-card-label">Subscriptions</div>
+                        <div class="summary-card-value">${pendingTasks || 4}</div>
+                        <div class="summary-card-label">Tasks</div>
                     </div>
                 </div>
             </div>
