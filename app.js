@@ -527,11 +527,12 @@ class HomeManagerApp {
 
         mainContent.addEventListener('touchstart', (e) => {
             // Don't trigger swipe if touching a scrollable element
-            if (e.target.closest('.calendar-grid') || 
-                e.target.closest('.action-items-list') || 
+            if (e.target.closest('.calendar-grid') ||
+                e.target.closest('.action-items-list') ||
                 e.target.closest('.recent-updates-list') ||
                 e.target.closest('.tasks-list') ||
                 e.target.closest('.items-grid') ||
+                e.target.closest('.metrics-carousel') ||
                 e.target.closest('.overlay') ||
                 e.target.closest('button') ||
                 e.target.closest('input') ||
@@ -566,11 +567,12 @@ class HomeManagerApp {
 
         mainContent.addEventListener('touchend', (e) => {
             // Don't trigger swipe if touching a scrollable element
-            if (e.target.closest('.calendar-grid') || 
-                e.target.closest('.action-items-list') || 
+            if (e.target.closest('.calendar-grid') ||
+                e.target.closest('.action-items-list') ||
                 e.target.closest('.recent-updates-list') ||
                 e.target.closest('.tasks-list') ||
                 e.target.closest('.items-grid') ||
+                e.target.closest('.metrics-carousel') ||
                 e.target.closest('.overlay') ||
                 e.target.closest('button') ||
                 e.target.closest('input') ||
@@ -1760,6 +1762,7 @@ class HomeManagerApp {
 
         carousel.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
+            e.stopPropagation(); // Prevent event bubbling to parent elements
         });
 
         carousel.addEventListener('touchend', (e) => {
@@ -1776,6 +1779,7 @@ class HomeManagerApp {
                     this.navigateMetrics(-1);
                 }
             }
+            e.stopPropagation(); // Prevent event bubbling to parent elements
         });
 
         // Make indicators clickable
