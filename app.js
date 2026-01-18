@@ -81,13 +81,18 @@ class HomeManagerApp {
         // Normalize: if pinEnabled is not explicitly 'true', treat as disabled
         const isPinEnabled = pinEnabled === 'true';
         
+        // Debug: Log PIN state
+        console.log('PIN State on init:', { pinEnabled, pinHash, isPinEnabled });
+        
         // Show PIN entry ONLY if PIN is explicitly enabled AND hash exists
         if (isPinEnabled && pinHash) {
+            console.log('Showing PIN entry screen');
             this.showPinEntry();
             return; // Don't initialize app until PIN is entered
         }
         
         // PIN is disabled or not set - ensure overlay is hidden and continue initialization
+        console.log('PIN disabled or not set, initializing app normally');
         const pinOverlay = document.getElementById('pin-entry-overlay');
         if (pinOverlay) {
             pinOverlay.style.display = 'none';
