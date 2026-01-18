@@ -2951,6 +2951,7 @@ body {
 
 .settings-option-content {
     flex: 1;
+    margin-right: 12px;
 }
 
 .settings-option-label {
