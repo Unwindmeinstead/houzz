@@ -3154,8 +3154,7 @@ class HomeManagerApp {
                             }
                         </div>
                         <div class="profile-info">
-                            <div class="profile-name">${profile.name ? `Hi, ${profile.name.split(' ')[0].charAt(0).toUpperCase() + profile.name.split(' ')[0].slice(1).toLowerCase()}!` : 'Hi!'}</div>
-                            <div class="profile-subtitle">Financial Overview</div>
+                            <div class="profile-name">${profile.name ? `${new Date().getHours() < 12 ? 'Morning' : 'Afternoon'}, ${profile.name.split(' ')[0].charAt(0).toUpperCase() + profile.name.split(' ')[0].slice(1).toLowerCase()}!` : `${new Date().getHours() < 12 ? 'Morning' : 'Afternoon'}!`}</div>
                         </div>
                     </div>
                 </div>
