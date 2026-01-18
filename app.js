@@ -2736,7 +2736,15 @@ class HomeManagerApp {
 
     renderHome() {
         const container = document.getElementById('tasks-container');
-        if (!container) return;
+        if (!container) {
+            console.error('tasks-container not found');
+            return;
+        }
+        
+        if (typeof storage === 'undefined') {
+            console.error('storage is not defined');
+            return;
+        }
 
         const counts = storage.getCounts();
         const todos = storage.getTodos();
