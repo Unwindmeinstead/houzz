@@ -1245,12 +1245,21 @@ class HomeManagerApp {
         
         document.body.appendChild(menu);
         
-        // Close on overlay click
+        // Close on overlay click (but not on menu content)
         menu.addEventListener('click', (e) => {
             if (e.target === menu) {
+                HapticFeedback.light();
                 menu.remove();
             }
         });
+        
+        // Prevent menu content clicks from closing
+        const menuContent = menu.querySelector('.date-entry-menu');
+        if (menuContent) {
+            menuContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
     }
 
     closeOverlay() {
