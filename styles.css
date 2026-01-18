@@ -354,7 +354,7 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 50px 20px;
+    padding: 60px 20px;
     height: 100%;
 }
 
@@ -363,7 +363,7 @@ body {
 }
 
 .metric-value-large {
-    font-size: 56px;
+    font-size: 72px;
     font-weight: 900;
     color: var(--text-white);
     line-height: 1.0;
@@ -396,7 +396,7 @@ body {
     }
 
     .metric-value-large {
-        font-size: 42px;
+        font-size: 54px;
     }
 
     .metric-label-large {
