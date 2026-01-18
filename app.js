@@ -2806,9 +2806,101 @@ class HomeManagerApp {
                 }
             }, 0);
 
+        // Placeholder/fake data for the top card
+        const fakeShortfall = 420;
+        const fakeBillAmount = 150;
+        const fakeBillName = 'electricity bill';
+        const fakeHoursUntilDue = 6;
+        const fakeLateFee = 25;
+        const fakeStreak = 2;
+
+        // Calculate total cash for display (cash category + checking)
+        const displayCash = totalCash + totalCheckingBalance;
+
         container.innerHTML = `
-            <!-- Summary Cards -->
-            <div class="home-summary-grid">
+            <!-- Critical Financial Alert Card (Large black card with placeholder data) -->
+            <div class="critical-alert-card">
+                <div class="critical-alert-header">
+                    <div class="warning-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="critical-alert-content">
+                        <div class="critical-alert-title">You are <span class="shortfall-amount">$${fakeShortfall}</span> short to clear bills this month</div>
+                        <div class="next-bill-info">
+                            <span>Next unpaid: <strong>$${fakeBillAmount} ${fakeBillName}</strong> due in <span class="time-urgent">${fakeHoursUntilDue} hrs</span></span>
+                            <span class="late-fee">$${fakeLateFee} late fee</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="fix-this-now-btn" onclick="HapticFeedback.medium(); app.switchView('bills')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <span>Fix This Now</span>
+                </button>
+                <div class="control-streak">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    <span>${fakeStreak} DAYS IN CONTROL ></span>
+                </div>
+            </div>
+
+            <!-- Summary Cards (Simplified - 3 cards, horizontal scroll) -->
+            <div class="summary-cards-scroll-container">
+                <div class="summary-cards-scroll">
+                <div class="summary-card">
+                    <div class="summary-card-icon cash-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16"/>
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value cash-value">$${displayCash.toFixed(0)}</div>
+                        <div class="summary-card-label">Cash</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon bills-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
+                            <path d="M9 8h6" />
+                            <path d="M9 12h6" />
+                            <path d="M9 16h4" />
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value bills-value">${unpaidBills} due</div>
+                        <div class="summary-card-label">Bills</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon tasks-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value tasks-value">${pendingTasks}</div>
+                        <div class="summary-card-label">Tasks</div>
+                    </div>
+                </div>
+                </div>
+                <div class="summary-cards-pagination">
+                    <span class="pagination-dot active"></span>
+                    <span class="pagination-dot"></span>
+                    <span class="pagination-dot"></span>
+                </div>
+            </div>
+
+            <!-- Old Summary Cards Grid (keeping for reference, will be removed) -->
+            <div class="home-summary-grid" style="display: none;">
                 <div class="summary-card">
                     <div class="summary-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
