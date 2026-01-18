@@ -3154,7 +3154,7 @@ class HomeManagerApp {
                             }
                         </div>
                         <div class="profile-info">
-                            <div class="profile-name">${profile.name || 'Welcome!'}</div>
+                            <div class="profile-name">${profile.name ? `Welcome, ${profile.name.split(' ')[0].charAt(0).toUpperCase() + profile.name.split(' ')[0].slice(1).toLowerCase()}!` : 'Welcome!'}</div>
                             <div class="profile-subtitle">Financial Overview</div>
                         </div>
                     </div>
