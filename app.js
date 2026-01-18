@@ -1749,6 +1749,173 @@ class HomeManagerApp {
         HapticFeedback.warning();
     }
 
+    openProfileSettings() {
+        // Create profile settings modal
+        const modal = document.createElement('div');
+        modal.className = 'overlay profile-modal';
+        modal.innerHTML = `
+            <div class="overlay-content profile-content">
+                <div class="profile-header">
+                    <h2>Edit Profile</h2>
+                    <button class="close-btn" onclick="this.closest('.profile-modal').remove(); HapticFeedback.light();">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="profile-body">
+                    <div class="profile-picture-section">
+                        <div class="profile-picture-container">
+                            <img id="profile-preview" src="" alt="Profile Picture" style="display: none;" />
+                            <div id="profile-placeholder" class="profile-placeholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="profile-picture-actions">
+                            <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="app.handleProfilePictureChange(event)">
+                            <button class="profile-action-btn" onclick="document.getElementById('profile-picture-input').click(); HapticFeedback.medium();">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14.828 14.828a4 4 0 0 1-5.656 0"/>
+                                    <path d="M9 10h1.586a1 1 0 0 1 .707.293l.707.707A1 1 0 0 0 12.414 11H15m-3-3h.01"/>
+                                    <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                                </svg>
+                                Change Photo
+                            </button>
+                            <button class="profile-action-btn danger" onclick="app.removeProfilePicture(); HapticFeedback.warning();">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"/>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                </svg>
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                    <div class="profile-form">
+                        <div class="form-group">
+                            <label for="profile-name">Display Name</label>
+                            <input type="text" id="profile-name" placeholder="Enter your name" maxlength="50" />
+                        </div>
+                        <div class="profile-actions">
+                            <button class="profile-save-btn" onclick="app.saveProfile(); HapticFeedback.success();">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6L9 17l-5-5"/>
+                                </svg>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Load existing profile data
+        this.loadProfileData();
+
+        HapticFeedback.medium();
+    }
+
+    loadProfileData() {
+        const profile = this.getProfile();
+        const nameInput = document.getElementById('profile-name');
+        const previewImg = document.getElementById('profile-preview');
+        const placeholder = document.getElementById('profile-placeholder');
+
+        if (nameInput && profile.name) {
+            nameInput.value = profile.name;
+        }
+
+        if (previewImg && placeholder && profile.picture) {
+            previewImg.src = profile.picture;
+            previewImg.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+    }
+
+    handleProfilePictureChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewImg = document.getElementById('profile-preview');
+                const placeholder = document.getElementById('profile-placeholder');
+
+                if (previewImg && placeholder) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    removeProfilePicture() {
+        const previewImg = document.getElementById('profile-preview');
+        const placeholder = document.getElementById('profile-placeholder');
+
+        if (previewImg && placeholder) {
+            previewImg.src = '';
+            previewImg.style.display = 'none';
+            placeholder.style.display = 'flex';
+        }
+
+        // Clear the file input
+        const fileInput = document.getElementById('profile-picture-input');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    }
+
+    saveProfile() {
+        const nameInput = document.getElementById('profile-name');
+        const previewImg = document.getElementById('profile-preview');
+
+        const profile = {
+            name: nameInput ? nameInput.value.trim() : '',
+            picture: previewImg && previewImg.style.display !== 'none' ? previewImg.src : null
+        };
+
+        this.setProfile(profile);
+
+        // Close modal
+        const modal = document.querySelector('.profile-modal');
+        if (modal) {
+            modal.remove();
+        }
+
+        // Refresh the metrics header to show updated profile
+        this.renderHome();
+
+        this.showToast('Profile updated successfully', 'success');
+    }
+
+    getProfile() {
+        try {
+            const profile = localStorage.getItem('userProfile');
+            return profile ? JSON.parse(profile) : { name: '', picture: null };
+        } catch (e) {
+            console.error('Error loading profile:', e);
+            return { name: '', picture: null };
+        }
+    }
+
+    setProfile(profile) {
+        try {
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            return true;
+        } catch (e) {
+            console.error('Error saving profile:', e);
+            return false;
+        }
+    }
+
     deleteAllData() {
         // Clear all data from storage
         const data = {
@@ -1763,6 +1930,9 @@ class HomeManagerApp {
         };
 
         storage.setData(data);
+
+        // Clear profile data
+        localStorage.removeItem('userProfile');
 
         // Close the confirmation overlay
         const confirmOverlay = document.querySelector('.delete-confirm-overlay');
@@ -2964,11 +3134,30 @@ class HomeManagerApp {
 
         const netWorth = totalCheckingBalance + totalSavingsBalance - totalCarLoans;
 
+        // Get profile data
+        const profile = this.getProfile();
+
         container.innerHTML = `
             <!-- Financial Metrics Card -->
             <div class="metrics-card">
                 <div class="metrics-header">
-                    <h3 class="metrics-title">Financial Overview</h3>
+                    <div class="profile-display">
+                        <div class="profile-avatar">
+                            ${profile.picture ?
+                                `<img src="${profile.picture}" alt="Profile" />` :
+                                `<div class="profile-avatar-placeholder">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                </div>`
+                            }
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name">${profile.name || 'Welcome!'}</div>
+                            <div class="profile-subtitle">Financial Overview</div>
+                        </div>
+                    </div>
                     <div class="metrics-nav">
                         <button class="metrics-nav-btn" id="metrics-prev" onclick="app.navigateMetrics(-1)">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
