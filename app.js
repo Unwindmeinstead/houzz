@@ -1738,7 +1738,7 @@ class HomeManagerApp {
                     <button class="delete-confirm-btn cancel-btn" onclick="this.closest('.delete-confirm-overlay').remove(); HapticFeedback.light();">
                         Cancel
                     </button>
-                    <button class="delete-confirm-btn delete-btn" onclick="app.deleteAllData(); this.closest('.delete-confirm-overlay').remove(); HapticFeedback.warning();">
+                    <button class="delete-confirm-btn delete-btn" onclick="app.deleteAllData();">
                         Delete Everything
                     </button>
                 </div>
@@ -1763,6 +1763,12 @@ class HomeManagerApp {
         };
 
         storage.setData(data);
+
+        // Close the confirmation overlay
+        const confirmOverlay = document.querySelector('.delete-confirm-overlay');
+        if (confirmOverlay) {
+            confirmOverlay.remove();
+        }
 
         // Close settings overlay
         document.getElementById('settings-overlay').classList.remove('active');
