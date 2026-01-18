@@ -78,8 +78,11 @@ class HomeManagerApp {
         const pinEnabled = localStorage.getItem('pinEnabled');
         const pinHash = localStorage.getItem('pinHash');
         
-        // Show PIN entry ONLY if PIN is explicitly enabled ('true') AND hash exists
-        if (pinEnabled === 'true' && pinHash) {
+        // Normalize: if pinEnabled is not explicitly 'true', treat as disabled
+        const isPinEnabled = pinEnabled === 'true';
+        
+        // Show PIN entry ONLY if PIN is explicitly enabled AND hash exists
+        if (isPinEnabled && pinHash) {
             this.showPinEntry();
             return; // Don't initialize app until PIN is entered
         }
@@ -90,10 +93,9 @@ class HomeManagerApp {
             pinOverlay.style.display = 'none';
         }
         
-        // If PIN is disabled but hash exists, clear the disabled state to prevent confusion
-        if (pinEnabled === 'false' && pinHash) {
-            // Keep hash but ensure state is clear
-            // Don't clear hash in case user wants to re-enable later
+        // If PIN is not enabled, ensure state is explicitly set to 'false'
+        if (!isPinEnabled) {
+            localStorage.setItem('pinEnabled', 'false');
         }
         
         this.setupEventListeners();
