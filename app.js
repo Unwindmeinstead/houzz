@@ -3179,26 +3179,26 @@ class HomeManagerApp {
                             <div class="profile-subtitle">Financial Overview</div>
                         </div>
                     </div>
-                    <div class="metrics-nav">
-                        <button class="metrics-nav-btn" id="metrics-prev" onclick="app.navigateMetrics(-1)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        <div class="metrics-indicators">
-                            <span class="indicator active" data-index="0"></span>
-                            <span class="indicator" data-index="1"></span>
-                            <span class="indicator" data-index="2"></span>
-                            <span class="indicator" data-index="3"></span>
-                            <span class="indicator" data-index="4"></span>
-                            <span class="indicator" data-index="5"></span>
-                        </div>
-                        <button class="metrics-nav-btn" id="metrics-next" onclick="app.navigateMetrics(1)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
+                </div>
+                <div class="metrics-nav">
+                    <button class="metrics-nav-btn" id="metrics-prev" onclick="app.navigateMetrics(-1)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="metrics-indicators">
+                        <span class="indicator active" data-index="0"></span>
+                        <span class="indicator" data-index="1"></span>
+                        <span class="indicator" data-index="2"></span>
+                        <span class="indicator" data-index="3"></span>
+                        <span class="indicator" data-index="4"></span>
+                        <span class="indicator" data-index="5"></span>
                     </div>
+                    <button class="metrics-nav-btn" id="metrics-next" onclick="app.navigateMetrics(1)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="metrics-carousel" id="metrics-carousel">
                     <div class="metric-slide active" data-index="0">
