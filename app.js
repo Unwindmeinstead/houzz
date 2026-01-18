@@ -1715,36 +1715,7 @@ class HomeManagerApp {
         }
     }
 
-    toggleQuickAccessSection() {
-        const container = document.getElementById('quick-access-container');
-        const indicator = document.getElementById('quick-access-indicator');
-        if (!container || !indicator) return;
-        
-        HapticFeedback.light();
-        const isCollapsed = container.classList.contains('collapsed');
-        
-        if (isCollapsed) {
-            container.classList.remove('collapsed');
-            indicator.style.transform = 'rotate(0deg)';
-            localStorage.setItem('quickAccessCollapsed', 'false');
-        } else {
-            container.classList.add('collapsed');
-            indicator.style.transform = 'rotate(-90deg)';
-            localStorage.setItem('quickAccessCollapsed', 'true');
-        }
-    }
 
-    loadQuickAccessState() {
-        const container = document.getElementById('quick-access-container');
-        const indicator = document.getElementById('quick-access-indicator');
-        if (!container || !indicator) return;
-        
-        const isCollapsed = localStorage.getItem('quickAccessCollapsed') === 'true';
-        if (isCollapsed) {
-            container.classList.add('collapsed');
-            indicator.style.transform = 'rotate(-90deg)';
-        }
-    }
 
     loadActionItemsState() {
         const container = document.getElementById('action-items-container');
@@ -2765,10 +2736,6 @@ class HomeManagerApp {
         // Get all open (incomplete) tasks
         const openTasks = todos.filter(todo => !todo.completed);
         
-        // Get pending counts for summary cards
-        const pendingTasks = todos.filter(todo => !todo.completed).length;
-        const unpaidBills = bills.filter(bill => !bill.paid).length;
-
         // Get upcoming bills
         const upcomingBills = bills.filter(bill => {
             if (bill.paid) return false;
@@ -2777,24 +2744,14 @@ class HomeManagerApp {
             return dueDate >= today && dueDate <= nextWeek;
         }).slice(0, 3);
 
-        // Calculate total income/expense
-        const totalIncome = finances
-            .filter(f => f.type === 'income')
-            .reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
-        const totalExpense = finances
-            .filter(f => f.type === 'expense')
-            .reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
-        
-        // Calculate total checking balance (sum of all checking entries)
+        // Calculate financial metrics
         const totalCheckingBalance = checking
             .reduce((sum, c) => sum + (parseFloat(c.balance) || 0), 0);
-        
-        // Calculate total car loan amount (sum of all amountOwed from cars)
-        const totalCarLoan = cars
-            .reduce((sum, car) => sum + (parseFloat(car.amountOwed) || 0), 0);
-        
-        // Calculate total monthly subscriptions
-        const totalSubscriptions = subscriptions
+
+        const totalSavingsBalance = savings
+            .reduce((sum, s) => sum + (parseFloat(s.balance) || 0), 0);
+
+        const monthlySubscriptions = subscriptions
             .reduce((sum, sub) => {
                 const amount = parseFloat(sub.amount) || 0;
                 if (sub.frequency === 'yearly') {
@@ -2806,136 +2763,106 @@ class HomeManagerApp {
                 }
             }, 0);
 
+        const monthlyInsurancePremiums = insurances
+            .reduce((sum, insurance) => {
+                const premium = parseFloat(insurance.premium) || 0;
+                if (insurance.frequency === 'yearly') {
+                    return sum + (premium / 12);
+                } else if (insurance.frequency === 'weekly') {
+                    return sum + (premium * 4.33);
+                } else {
+                    return sum + premium;
+                }
+            }, 0);
+
+        const totalUnpaidBills = bills
+            .filter(bill => !bill.paid)
+            .reduce((sum, bill) => sum + (parseFloat(bill.amount) || 0), 0);
+
+        const totalCarLoans = cars
+            .reduce((sum, car) => sum + (parseFloat(car.amountOwed) || 0), 0);
+
+        const netWorth = totalCheckingBalance + totalSavingsBalance - totalCarLoans;
+
         container.innerHTML = `
-            <!-- Large Top Alert Card -->
-            <div class="top-alert-card">
-                <div class="alert-card-header">
-                    <div class="alert-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                            <line x1="12" y1="9" x2="12" y2="13"/>
-                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                        </svg>
-                    </div>
-                    <div class="alert-content">
-                        <div class="alert-title">You are <span class="alert-amount">$420</span> short to clear bills this month</div>
-                        <div class="alert-subtitle">
-                            <span class="alert-due">Next unpaid: $150 electricity bill due in 6 hrs</span>
-                            <span class="alert-fee">$25 late fee</span>
-                        </div>
-                    </div>
-                </div>
-                <button class="alert-action-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                    <span>Fix This Now</span>
-                </button>
-                <div class="alert-streak">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                    <span>2 DAYS IN CONTROL ></span>
-                </div>
-            </div>
-
-            <!-- Summary Cards -->
-            <div class="home-summary-grid">
-                <div class="summary-card">
-                    <div class="summary-card-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                    </div>
-                    <div class="summary-card-content">
-                        <div class="summary-card-value" style="color: #22c55e;">$${totalCheckingBalance.toFixed(0) || '2,340'}</div>
-                        <div class="summary-card-label">Cash</div>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-card-icon" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
-                            <path d="M9 8h6" />
-                            <path d="M9 12h6" />
-                            <path d="M9 16h4" />
-                        </svg>
-                    </div>
-                    <div class="summary-card-content">
-                        <div class="summary-card-value" style="color: #fbbf24;">${unpaidBills || 2} due</div>
-                        <div class="summary-card-label">Bills</div>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-card-icon" style="background: rgba(255, 255, 255, 0.05); color: var(--text-white);">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 11l3 3L22 4" />
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                        </svg>
-                    </div>
-                    <div class="summary-card-content">
-                        <div class="summary-card-value">${pendingTasks || 4}</div>
-                        <div class="summary-card-label">Tasks</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Access Cards -->
-            <div class="home-section">
-                <h2 class="home-section-title collapsible-title">
-                    <span onclick="app.toggleQuickAccessSection()" style="flex: 1; display: flex; align-items: center; gap: 8px;">
-                        <span>Quick Access</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-indicator" id="quick-access-indicator">
-                            <path d="M6 9l6 6 6-6"/>
-                        </svg>
-                    </span>
-                </h2>
-                <div class="quick-access-container" id="quick-access-container">
-                    <div class="quick-access-grid">
-                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('cars')">
-                        <div class="quick-access-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 16v-3l2-5h14l2 5v3" />
-                                <path d="M5 16h14" />
-                                <circle cx="7.5" cy="16.5" r="1.5" />
-                                <circle cx="16.5" cy="16.5" r="1.5" />
+            <!-- Financial Metrics Card -->
+            <div class="metrics-card">
+                <h3 class="metrics-title">Financial Overview</h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                             </svg>
                         </div>
-                        <div class="quick-access-label">Cars</div>
-                        <div class="quick-access-count">${counts.cars}</div>
-                    </button>
-                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('finance')">
-                        <div class="quick-access-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3v18" />
-                                <path d="M16 7.5c0-1.9-1.8-3.5-4-3.5s-4 1.6-4 3.5 1.8 3.5 4 3.5 4 1.6 4 3.5-1.8 3.5-4 3.5-4-1.6-4-3.5" />
+                        <div class="metric-content">
+                            <div class="metric-value">$${totalCheckingBalance.toFixed(0)}</div>
+                            <div class="metric-label">Checking</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                <circle cx="12" cy="12" r="2"/>
                             </svg>
                         </div>
-                        <div class="quick-access-label">Finance</div>
-                        <div class="quick-access-count">${counts.finances}</div>
-                    </button>
-                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('bills')">
-                        <div class="quick-access-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
-                                <path d="M9 8h6" />
-                                <path d="M9 12h6" />
-                                <path d="M9 16h4" />
+                        <div class="metric-content">
+                            <div class="metric-value">$${totalSavingsBalance.toFixed(0)}</div>
+                            <div class="metric-label">Savings</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="8" cy="21" r="1"/>
+                                <circle cx="19" cy="21" r="1"/>
+                                <path d="m2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
                             </svg>
                         </div>
-                        <div class="quick-access-label">Bills</div>
-                        <div class="quick-access-count">${counts.bills}</div>
-                    </button>
-                    <button class="quick-access-card" onclick="HapticFeedback.medium(); app.openAddModal()">
-                        <div class="quick-access-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="9" />
-                                <path d="M12 8v8" />
-                                <path d="M8 12h8" />
+                        <div class="metric-content">
+                            <div class="metric-value">$${monthlySubscriptions.toFixed(0)}</div>
+                            <div class="metric-label">Monthly Subs</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M9 12l2 2 4-4"/>
                             </svg>
                         </div>
-                        <div class="quick-access-label">Add New</div>
-                    </button>
+                        <div class="metric-content">
+                            <div class="metric-value">$${monthlyInsurancePremiums.toFixed(0)}</div>
+                            <div class="metric-label">Insurance</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/>
+                                <path d="M9 8h6"/>
+                                <path d="M9 12h6"/>
+                                <path d="M9 16h4"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value">$${totalUnpaidBills.toFixed(0)}</div>
+                            <div class="metric-label">Bills Due</div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                <path d="M8 10l4 4"/>
+                                <path d="M16 14l-4-4"/>
+                            </svg>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" style="color: ${netWorth >= 0 ? '#22c55e' : '#ef4444'};">$${netWorth.toFixed(0)}</div>
+                            <div class="metric-label">Net Worth</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3197,7 +3124,6 @@ class HomeManagerApp {
         setTimeout(() => {
             this.loadRecentUpdatesState();
             this.loadActionItemsState();
-            this.loadQuickAccessState();
         }, 100);
         
         // Update notification badge
