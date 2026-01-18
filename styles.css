@@ -1564,6 +1564,30 @@ body {
     transform: scale(0.98);
 }
 
+/* Individual item delete confirmation buttons */
+.delete-confirm-actions .cancel-btn {
+    flex: 2 !important; /* Make cancel button bigger */
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-white) !important;
+}
+
+.delete-confirm-actions .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.delete-confirm-actions .delete-btn {
+    flex: 1 !important; /* Make delete button smaller */
+    background: #dc2626 !important;
+    color: white !important;
+    font-size: 14px !important;
+    padding: 10px 16px !important;
+}
+
+.delete-confirm-actions .delete-btn:hover {
+    background: #b91c1c !important;
+}
+
 /* Insights */
 .insights-grid {
     display: grid;
