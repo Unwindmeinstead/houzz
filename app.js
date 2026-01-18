@@ -824,6 +824,36 @@ class HomeManagerApp {
 
         formTitle.textContent = this.editingItem ? `Edit ${categoryNames[category] || 'Item'}` : `Add ${categoryNames[category] || 'Item'}`;
         submitBtn.textContent = this.editingItem ? 'Update' : 'Add';
+
+        // Add or remove delete button based on editing state
+        const formContainer = document.querySelector('.slide-form');
+        let deleteBtn = formContainer.querySelector('.delete-btn');
+
+        if (this.editingItem) {
+            // Add delete button if editing
+            if (!deleteBtn) {
+                deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                    Delete
+                `;
+                deleteBtn.onclick = () => {
+                    this.confirmDelete(category, this.editingItem.id, this.editingItem.title || this.editingItem.name || 'Item');
+                };
+                formContainer.appendChild(deleteBtn);
+            }
+        } else {
+            // Remove delete button if adding new item
+            if (deleteBtn) {
+                deleteBtn.remove();
+            }
+        }
         
         // Clear ID field if adding new item
         if (!this.editingItem) {

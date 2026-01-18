@@ -3136,6 +3136,37 @@ body {
     opacity: 0.8;
 }
 
+.delete-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    margin-top: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 6px;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-start;
+}
+
+.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn:active {
+    transform: scale(0.96);
+}
+
+.delete-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
 /* Category Selection */
 .category-selection {
     display: grid;
