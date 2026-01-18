@@ -1423,11 +1423,20 @@ class HomeManagerApp {
                 card.addEventListener('click', (e) => {
                     const category = card.getAttribute('data-category');
                     const index = parseInt(card.getAttribute('data-index'));
-                    const items = category === 'cars' ? storage.getCars() :
-                                 category === 'finances' ? storage.getFinances() :
-                                 category === 'bills' ? storage.getBills() :
-                                 category === 'subscriptions' ? storage.getAll('subscriptions') || [] :
-                                 category === 'insurances' ? storage.getAll('insurances') || [] : [];
+                    let items = [];
+                    if (category === 'cars') {
+                        items = storage.getCars();
+                    } else if (category === 'finances') {
+                        items = storage.getFinances();
+                    } else if (category === 'checking') {
+                        items = storage.getAll('checking') || [];
+                    } else if (category === 'bills') {
+                        items = storage.getBills();
+                    } else if (category === 'subscriptions') {
+                        items = storage.getAll('subscriptions') || [];
+                    } else if (category === 'insurances') {
+                        items = storage.getAll('insurances') || [];
+                    }
                     if (items[index]) {
                         this.openAddModal(category, items[index]);
                     }
