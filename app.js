@@ -1421,24 +1421,50 @@ class HomeManagerApp {
         setTimeout(() => {
             document.querySelectorAll('.item-card[data-category]').forEach(card => {
                 card.addEventListener('click', (e) => {
+                    // Don't trigger if clicking delete button
+                    if (e.target.closest('.item-delete-btn')) return;
+                    HapticFeedback.light();
                     const category = card.getAttribute('data-category');
                     const index = parseInt(card.getAttribute('data-index'));
-                    let items = [];
-                    if (category === 'cars') {
-                        items = storage.getCars();
-                    } else if (category === 'finances') {
-                        items = storage.getFinances();
-                    } else if (category === 'checking') {
-                        items = storage.getAll('checking') || [];
-                    } else if (category === 'bills') {
-                        items = storage.getBills();
-                    } else if (category === 'subscriptions') {
-                        items = storage.getAll('subscriptions') || [];
-                    } else if (category === 'insurances') {
-                        items = storage.getAll('insurances') || [];
-                    }
-                    if (items[index]) {
-                        this.openAddModal(category, items[index]);
+                    const itemId = card.getAttribute('data-item-id');
+                    
+                    // For finance page, we need to handle combined entries
+                    if (category === 'checking' || (category === 'finances' && this.currentView === 'finance')) {
+                        // Get the combined entries array
+                        const finances = storage.getFinances();
+                        const checking = storage.getAll('checking') || [];
+                        const allEntries = [
+                            ...finances.map(f => ({ ...f, entryType: 'finance' })),
+                            ...checking.map(c => ({ ...c, entryType: 'checking' }))
+                        ];
+                        const sortedEntries = [...allEntries].sort((a, b) => {
+                            const dateA = a.date ? new Date(a.date) : (a.createdAt ? new Date(a.createdAt) : new Date(0));
+                            const dateB = b.date ? new Date(b.date) : (b.createdAt ? new Date(b.createdAt) : new Date(0));
+                            return dateB - dateA;
+                        });
+                        
+                        if (sortedEntries[index]) {
+                            const entry = sortedEntries[index];
+                            const entryCategory = entry.entryType === 'checking' ? 'checking' : 'finances';
+                            this.openAddModal(entryCategory, entry);
+                        }
+                    } else {
+                        // For other categories, use standard lookup
+                        let items = [];
+                        if (category === 'cars') {
+                            items = storage.getCars();
+                        } else if (category === 'finances') {
+                            items = storage.getFinances();
+                        } else if (category === 'bills') {
+                            items = storage.getBills();
+                        } else if (category === 'subscriptions') {
+                            items = storage.getAll('subscriptions') || [];
+                        } else if (category === 'insurances') {
+                            items = storage.getAll('insurances') || [];
+                        }
+                        if (items[index]) {
+                            this.openAddModal(category, items[index]);
+                        }
                     }
                 });
             });
