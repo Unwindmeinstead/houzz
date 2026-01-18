@@ -1130,8 +1130,15 @@ class HomeManagerApp {
         }, 100);
     }
 
-    showDateEntryMenu(dateStr) {
-        const formattedDate = new Date(dateStr).toLocaleDateString('en-US', { 
+    showDateEntryMenu(dateStr, existingItems = []) {
+        // Parse date string to avoid timezone issues
+        const dateParts = dateStr.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1;
+        const day = parseInt(dateParts[2]);
+        const date = new Date(year, month, day);
+        
+        const formattedDate = date.toLocaleDateString('en-US', { 
             weekday: 'long', 
             month: 'long', 
             day: 'numeric', 
@@ -1141,18 +1148,58 @@ class HomeManagerApp {
         // Create menu overlay
         const menu = document.createElement('div');
         menu.className = 'date-entry-menu-overlay';
+        
+        // Format existing items for display
+        let existingItemsHTML = '';
+        if (existingItems && existingItems.length > 0) {
+            existingItemsHTML = `
+                <div class="date-entry-existing">
+                    <h4 class="date-entry-existing-title">Existing Entries</h4>
+                    <div class="date-entry-existing-list">
+                        ${existingItems.map(item => {
+                            let itemTitle = '';
+                            let itemSubtitle = '';
+                            if (item.type === 'task') {
+                                itemTitle = item.item.title || 'Task';
+                                itemSubtitle = 'Task';
+                            } else if (item.type === 'bill') {
+                                itemTitle = item.item.name || 'Bill';
+                                itemSubtitle = item.item.amount ? `$${parseFloat(item.item.amount).toFixed(2)}` : 'Bill';
+                            } else if (item.type === 'subscription') {
+                                itemTitle = item.item.name || 'Subscription';
+                                itemSubtitle = item.item.amount ? `$${parseFloat(item.item.amount).toFixed(2)}` : 'Subscription';
+                            }
+                            return `
+                                <div class="date-entry-existing-item" onclick="HapticFeedback.light(); app.openAddModal('${item.type === 'task' ? 'todos' : item.type === 'subscription' ? 'subscriptions' : 'bills'}', ${JSON.stringify(item.item).replace(/"/g, '&quot;')}); this.closest('.date-entry-menu-overlay').remove();">
+                                    <div class="date-entry-existing-item-content">
+                                        <div class="date-entry-existing-item-title">${itemTitle}</div>
+                                        <div class="date-entry-existing-item-subtitle">${itemSubtitle}</div>
+                                    </div>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14"/>
+                                        <path d="M12 5l7 7-7 7"/>
+                                    </svg>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
         menu.innerHTML = `
             <div class="date-entry-menu">
                 <div class="date-entry-menu-header">
-                    <h3 class="date-entry-menu-title">Add Entry for</h3>
+                    <h3 class="date-entry-menu-title">${existingItems && existingItems.length > 0 ? 'Entries for' : 'Add Entry for'}</h3>
                     <p class="date-entry-menu-date">${formattedDate}</p>
-                    <button class="date-entry-menu-close" onclick="this.closest('.date-entry-menu-overlay').remove()">
+                    <button class="date-entry-menu-close" onclick="HapticFeedback.light(); this.closest('.date-entry-menu-overlay').remove();">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/>
                             <line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
                     </button>
                 </div>
+                ${existingItemsHTML}
                 <div class="date-entry-menu-options">
                     <button class="date-entry-option" onclick="HapticFeedback.medium(); app.openAddModalWithDate('todos', '${dateStr}'); this.closest('.date-entry-menu-overlay').remove();">
                         <div class="date-entry-option-icon">
@@ -1398,14 +1445,16 @@ class HomeManagerApp {
         const lastClearedDate = lastCleared ? new Date(lastCleared) : null;
 
         const activities = [];
-        const categories = ['todos', 'cars', 'bills', 'insurances', 'finances', 'savings'];
+        const categories = ['todos', 'cars', 'bills', 'insurances', 'finances', 'savings', 'subscriptions', 'checking'];
         const categoryNames = {
             todos: 'Task',
             cars: 'Car',
             bills: 'Bill',
             insurances: 'Insurance',
             finances: 'Finance',
-            savings: 'Savings'
+            savings: 'Savings',
+            subscriptions: 'Subscription',
+            checking: 'Checking'
         };
 
         categories.forEach(category => {
@@ -1653,26 +1702,65 @@ class HomeManagerApp {
         todos.forEach(task => {
             const taskDate = task.date || task.dueDate;
             if (taskDate) {
-                const date = new Date(taskDate);
-                if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
-                    const dateKey = date.getDate();
-                    if (!dateItems[dateKey]) {
-                        dateItems[dateKey] = { tasks: 0, bills: 0 };
+                // Parse date string directly to avoid timezone issues
+                const dateParts = taskDate.split('-');
+                if (dateParts.length === 3) {
+                    const year = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+                    const day = parseInt(dateParts[2]);
+                    const date = new Date(year, month, day);
+                    if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                        const dateKey = date.getDate();
+                        if (!dateItems[dateKey]) {
+                            dateItems[dateKey] = { tasks: 0, bills: 0, subscriptions: 0, items: [] };
+                        }
+                        dateItems[dateKey].tasks++;
+                        dateItems[dateKey].items.push({ type: 'task', item: task });
                     }
-                    dateItems[dateKey].tasks++;
                 }
             }
         });
         
         bills.forEach(bill => {
             if (bill.dueDate) {
-                const date = new Date(bill.dueDate);
-                if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
-                    const dateKey = date.getDate();
-                    if (!dateItems[dateKey]) {
-                        dateItems[dateKey] = { tasks: 0, bills: 0 };
+                // Parse date string directly to avoid timezone issues
+                const dateParts = bill.dueDate.split('-');
+                if (dateParts.length === 3) {
+                    const year = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+                    const day = parseInt(dateParts[2]);
+                    const date = new Date(year, month, day);
+                    if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                        const dateKey = date.getDate();
+                        if (!dateItems[dateKey]) {
+                            dateItems[dateKey] = { tasks: 0, bills: 0, subscriptions: 0, items: [] };
+                        }
+                        dateItems[dateKey].bills++;
+                        dateItems[dateKey].items.push({ type: 'bill', item: bill });
                     }
-                    dateItems[dateKey].bills++;
+                }
+            }
+        });
+
+        // Add subscriptions
+        const subscriptions = storage.getAll('subscriptions') || [];
+        subscriptions.forEach(sub => {
+            if (sub.billingDate) {
+                // Parse date string directly to avoid timezone issues
+                const dateParts = sub.billingDate.split('-');
+                if (dateParts.length === 3) {
+                    const year = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+                    const day = parseInt(dateParts[2]);
+                    const date = new Date(year, month, day);
+                    if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                        const dateKey = date.getDate();
+                        if (!dateItems[dateKey]) {
+                            dateItems[dateKey] = { tasks: 0, bills: 0, subscriptions: 0, items: [] };
+                        }
+                        dateItems[dateKey].subscriptions++;
+                        dateItems[dateKey].items.push({ type: 'subscription', item: sub });
+                    }
                 }
             }
         });
@@ -1699,18 +1787,22 @@ class HomeManagerApp {
         for (let day = 1; day <= daysInMonth; day++) {
             const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
             const hasItems = dateItems[day];
-            const totalItems = hasItems ? (hasItems.tasks || 0) + (hasItems.bills || 0) : 0;
+            const totalItems = hasItems ? (hasItems.tasks || 0) + (hasItems.bills || 0) + (hasItems.subscriptions || 0) : 0;
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             
             calendarHTML += `
                 <div class="calendar-day ${isToday ? 'today' : ''} ${hasItems ? 'has-items' : ''}" 
                      data-day="${day}" 
                      data-month="${currentMonth}" 
-                     data-year="${currentYear}">
+                     data-year="${currentYear}"
+                     data-date="${dateStr}"
+                     onclick="app.showDateEntryMenu('${dateStr}', ${hasItems ? JSON.stringify(hasItems.items || []).replace(/"/g, '&quot;') : '[]'})">
                     <div class="calendar-day-number">${day}</div>
                     ${hasItems ? `
                         <div class="calendar-day-indicators">
                             ${hasItems.tasks > 0 ? `<span class="calendar-indicator task-indicator"></span>` : ''}
                             ${hasItems.bills > 0 ? `<span class="calendar-indicator bill-indicator"></span>` : ''}
+                            ${hasItems.subscriptions > 0 ? `<span class="calendar-indicator subscription-indicator"></span>` : ''}
                         </div>
                     ` : ''}
                 </div>
