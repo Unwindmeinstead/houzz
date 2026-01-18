@@ -67,10 +67,19 @@ class HomeManagerApp {
         this.touchEndY = 0;
         this.minSwipeDistance = 50; // Minimum distance for a swipe
         this.maxVerticalDistance = 100; // Max vertical movement to still count as horizontal swipe
+        this.pinEntry = '';
+        this.pinSetupStep = 'enter'; // 'enter' or 'confirm'
+        this.pinSetupEntered = '';
         this.init();
     }
 
     init() {
+        // Check if PIN protection is enabled
+        if (this.isPinEnabled()) {
+            this.showPinEntry();
+            return; // Don't initialize app until PIN is entered
+        }
+        
         this.setupEventListeners();
         this.renderHome();
         this.updateCategoryCounts();
@@ -78,6 +87,7 @@ class HomeManagerApp {
         this.initNotifications();
         this.checkNotificationPermission();
         this.startNotificationChecker();
+        this.updatePinUI();
     }
 
     openSettings() {

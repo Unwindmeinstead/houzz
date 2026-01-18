@@ -2931,6 +2931,157 @@ body {
     box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
 }
 
+/* PIN Entry */
+.pin-entry-content,
+.pin-setup-content {
+    max-width: 400px;
+    width: 100%;
+    padding: 32px 24px;
+    text-align: center;
+}
+
+.pin-entry-header,
+.pin-setup-header {
+    margin-bottom: 32px;
+    position: relative;
+}
+
+.pin-entry-header h2,
+.pin-setup-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 8px;
+}
+
+.pin-entry-subtitle,
+.pin-setup-subtitle {
+    font-size: 14px;
+    color: var(--text-gray);
+    margin: 0;
+}
+
+.pin-setup-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    color: var(--text-white);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pin-setup-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pin-entry-display {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pin-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    transition: all 0.2s;
+}
+
+.pin-dot.filled {
+    background: var(--text-white);
+    border-color: var(--text-white);
+}
+
+.pin-entry-error {
+    color: #ef4444;
+    font-size: 14px;
+    margin-bottom: 24px;
+    min-height: 20px;
+}
+
+.pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.pin-key {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-white);
+    font-size: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pin-key:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.pin-key:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.pin-key-empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.pin-key-empty:hover {
+    background: transparent;
+    transform: none;
+}
+
+.pin-key-delete {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.pin-key-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.pin-key-delete svg {
+    width: 24px;
+    height: 24px;
+}
+
+#pin-entry-overlay {
+    z-index: 10001;
+    background: rgba(0, 0, 0, 0.95);
+}
+
+#pin-setup-overlay {
+    z-index: 10002;
+    background: rgba(0, 0, 0, 0.95);
+}
+
 
 .close-btn {
     width: 32px;
