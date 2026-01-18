@@ -4909,7 +4909,17 @@ class HomeManagerApp {
             this.updatePinDots('entry');
             
             if (this.pinEntry.length === 4) {
-                setTimeout(() => {
+                requestAnimationFrame(() => {
+                    // Double-check PIN is still enabled before verifying
+                    const pinEnabled = localStorage.getItem('pinEnabled') === 'true';
+                    const pinHash = localStorage.getItem('pinHash');
+                    
+                    if (!pinEnabled || !pinHash) {
+                        // PIN was disabled while entering, just hide overlay
+                        this.hidePinEntry();
+                        return;
+                    }
+                    
                     if (this.verifyPin(this.pinEntry)) {
                         HapticFeedback.success();
                         this.hidePinEntry();
@@ -4921,18 +4931,21 @@ class HomeManagerApp {
                         this.initNotifications();
                         this.checkNotificationPermission();
                         this.startNotificationChecker();
+                        this.updatePinUI(); // Ensure UI reflects correct state
                     } else {
                         HapticFeedback.error();
                         this.pinEntry = '';
                         this.updatePinDots('entry');
                         const errorEl = document.getElementById('pin-entry-error');
-                        errorEl.textContent = 'Incorrect PIN. Please try again.';
-                        errorEl.style.display = 'block';
-                        setTimeout(() => {
-                            errorEl.style.display = 'none';
-                        }, 3000);
+                        if (errorEl) {
+                            errorEl.textContent = 'Incorrect PIN. Please try again.';
+                            errorEl.style.display = 'block';
+                            setTimeout(() => {
+                                errorEl.style.display = 'none';
+                            }, 3000);
+                        }
                     }
-                }, 100);
+                });
             }
         }
     }
