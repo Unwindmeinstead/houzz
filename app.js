@@ -1760,9 +1760,13 @@ class HomeManagerApp {
     }
 
     openProfileSettings() {
+        console.log('Opening profile settings...'); // Debug
+
         // Create profile settings modal
         const modal = document.createElement('div');
-        modal.className = 'overlay profile-modal';
+        modal.className = 'overlay profile-modal active';
+        console.log('Created modal element'); // Debug
+
         modal.innerHTML = `
             <div class="overlay-content profile-content">
                 <div class="profile-header">
@@ -1824,11 +1828,18 @@ class HomeManagerApp {
         `;
 
         document.body.appendChild(modal);
+        console.log('Modal appended to body, classes:', modal.className); // Debug
+
+        // Force display to make sure it's visible
+        modal.style.display = 'flex';
+        console.log('Modal display set to flex'); // Debug
 
         // Load existing profile data
         this.loadProfileData();
+        console.log('Profile data loaded'); // Debug
 
         HapticFeedback.medium();
+        console.log('Haptic feedback triggered'); // Debug
     }
 
     loadProfileData() {
