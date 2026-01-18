@@ -801,6 +801,10 @@ body {
     background: #fbbf24;
 }
 
+.calendar-indicator.subscription-indicator {
+    background: #8b5cf6;
+}
+
 /* Action Items Card */
 .action-items-container {
     transition: max-height 0.3s ease, opacity 0.3s ease;
