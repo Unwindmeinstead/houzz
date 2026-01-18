@@ -270,8 +270,14 @@ body {
 .metrics-header {
     display: flex;
     align-items: center;
-    justify: flex-start;
+    justify: space-between;
     margin-bottom: 20px;
+}
+
+.metrics-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .metrics-title {

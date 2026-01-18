@@ -456,6 +456,16 @@ class HomeManagerApp {
             this.openSettings();
         });
 
+        // Card notifications button (delegated event listener)
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#card-notifications-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                HapticFeedback.medium();
+                this.openNotifications();
+            }
+        });
+
         // Close settings
         document.getElementById('close-settings')?.addEventListener('click', () => {
             HapticFeedback.light();
@@ -2528,18 +2538,24 @@ class HomeManagerApp {
     }
 
     updateNotificationBadge() {
-        const badge = document.getElementById('notification-badge');
-        if (!badge) return;
-        
+        const headerBadge = document.getElementById('notification-badge');
+        const cardBadge = document.getElementById('card-notification-badge');
+
         const actionItems = this.getActionItems();
         const count = actionItems.length;
-        
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
-        }
+
+        const updateBadge = (badge) => {
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        };
+
+        updateBadge(headerBadge);
+        updateBadge(cardBadge);
     }
 
     openNotifications() {
@@ -3156,6 +3172,15 @@ class HomeManagerApp {
                         <div class="profile-info">
                             <div class="profile-name">${profile.name ? `${new Date().getHours() < 12 ? 'Morning' : 'Afternoon'}, ${profile.name.split(' ')[0].charAt(0).toUpperCase() + profile.name.split(' ')[0].slice(1).toLowerCase()}!` : `${new Date().getHours() < 12 ? 'Morning' : 'Afternoon'}!`}</div>
                         </div>
+                    </div>
+                    <div class="metrics-actions">
+                        <button class="icon-btn notifications-btn" id="card-notifications-btn" aria-label="Notifications">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            <span class="notification-badge" id="card-notification-badge" style="display: none;">0</span>
+                        </button>
                     </div>
                 </div>
                 <div class="metrics-carousel" id="metrics-carousel">
