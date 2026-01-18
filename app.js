@@ -739,6 +739,8 @@ class HomeManagerApp {
             this.renderFinance();
         } else if (view === 'bills') {
             this.renderBills();
+        } else if (view === 'insights') {
+            this.renderInsights();
         } else if (view === 'insurances') {
             this.renderInsurances();
         }
@@ -3734,6 +3736,80 @@ class HomeManagerApp {
                             <div class="category-card-count">${counts.savings} items</div>
                         </div>
                     </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInsights() {
+        const container = document.getElementById('tasks-container');
+        if (!container) return;
+
+        // Calculate some basic insights
+        const finances = storage.getFinances();
+        const totalIncome = finances.filter(f => f.type === 'income').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+        const totalExpenses = finances.filter(f => f.type === 'expense').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+        const netIncome = totalIncome - totalExpenses;
+
+        const cars = storage.getCars();
+        const totalCarValue = cars.reduce((sum, car) => sum + (parseFloat(car.amountOwed) || 0), 0);
+
+        container.innerHTML = `
+            <div class="view-header">
+                <h1>Financial Insights</h1>
+            </div>
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <div class="insight-content">
+                        <div class="insight-value">$${totalIncome.toFixed(0)}</div>
+                        <div class="insight-label">Total Income</div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/>
+                        </svg>
+                    </div>
+                    <div class="insight-content">
+                        <div class="insight-value">$${totalExpenses.toFixed(0)}</div>
+                        <div class="insight-label">Total Expenses</div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon" style="color: ${netIncome >= 0 ? '#22c55e' : '#ef4444'}">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            <path d="M8 10l4 4"/>
+                            <path d="M16 14l-4-4"/>
+                        </svg>
+                    </div>
+                    <div class="insight-content">
+                        <div class="insight-value" style="color: ${netIncome >= 0 ? '#22c55e' : '#ef4444'};">$${netIncome.toFixed(0)}</div>
+                        <div class="insight-label">Net Income</div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/>
+                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                            <path d="M7 21h10"/>
+                        </svg>
+                    </div>
+                    <div class="insight-content">
+                        <div class="insight-value">$${totalCarValue.toFixed(0)}</div>
+                        <div class="insight-label">Car Loans</div>
+                    </div>
                 </div>
             </div>
         `;
