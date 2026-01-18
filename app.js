@@ -1700,10 +1700,10 @@ class HomeManagerApp {
         const container = document.getElementById('action-items-container');
         const indicator = document.getElementById('action-items-indicator');
         if (!container || !indicator) return;
-        
+
         HapticFeedback.light();
         const isCollapsed = container.classList.contains('collapsed');
-        
+
         if (isCollapsed) {
             container.classList.remove('collapsed');
             indicator.style.transform = 'rotate(0deg)';
@@ -1715,7 +1715,89 @@ class HomeManagerApp {
         }
     }
 
+    navigateMetrics(direction) {
+        const carousel = document.getElementById('metrics-carousel');
+        const indicators = document.querySelectorAll('.indicator');
+        const slides = document.querySelectorAll('.metric-slide');
 
+        if (!carousel || !indicators.length || !slides.length) return;
+
+        // Find current active slide
+        let currentIndex = 0;
+        slides.forEach((slide, index) => {
+            if (slide.classList.contains('active')) {
+                currentIndex = index;
+            }
+        });
+
+        // Calculate new index
+        let newIndex = currentIndex + direction;
+        if (newIndex < 0) newIndex = slides.length - 1;
+        if (newIndex >= slides.length) newIndex = 0;
+
+        // Update slides
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === newIndex);
+        });
+
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === newIndex);
+        });
+
+        HapticFeedback.light();
+    }
+
+    initMetricsCarousel() {
+        const carousel = document.getElementById('metrics-carousel');
+        const indicators = document.querySelectorAll('.indicator');
+
+        if (!carousel) return;
+
+        // Add touch support for swipe gestures
+        let startX = 0;
+        let endX = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        carousel.addEventListener('touchend', (e) => {
+            endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+
+            // Minimum swipe distance
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    // Swipe left - next slide
+                    this.navigateMetrics(1);
+                } else {
+                    // Swipe right - previous slide
+                    this.navigateMetrics(-1);
+                }
+            }
+        });
+
+        // Make indicators clickable
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                const slides = document.querySelectorAll('.metric-slide');
+                const currentActive = document.querySelector('.metric-slide.active');
+
+                if (currentActive && parseInt(currentActive.dataset.index) !== index) {
+                    slides.forEach((slide, slideIndex) => {
+                        slide.classList.toggle('active', slideIndex === index);
+                    });
+
+                    indicators.forEach((ind, indIndex) => {
+                        ind.classList.toggle('active', indIndex === index);
+                    });
+
+                    HapticFeedback.light();
+                }
+            });
+        });
+    }
 
     loadActionItemsState() {
         const container = document.getElementById('action-items-container');
@@ -2787,81 +2869,115 @@ class HomeManagerApp {
         container.innerHTML = `
             <!-- Financial Metrics Card -->
             <div class="metrics-card">
-                <h3 class="metrics-title">Financial Overview</h3>
-                <div class="metrics-grid">
-                    <div class="metric-item">
-                        <div class="metric-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                <div class="metrics-header">
+                    <h3 class="metrics-title">Financial Overview</h3>
+                    <div class="metrics-nav">
+                        <button class="metrics-nav-btn" id="metrics-prev" onclick="app.navigateMetrics(-1)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
                             </svg>
+                        </button>
+                        <div class="metrics-indicators">
+                            <span class="indicator active" data-index="0"></span>
+                            <span class="indicator" data-index="1"></span>
+                            <span class="indicator" data-index="2"></span>
+                            <span class="indicator" data-index="3"></span>
+                            <span class="indicator" data-index="4"></span>
+                            <span class="indicator" data-index="5"></span>
                         </div>
-                        <div class="metric-content">
-                            <div class="metric-value">$${totalCheckingBalance.toFixed(0)}</div>
-                            <div class="metric-label">Checking</div>
+                        <button class="metrics-nav-btn" id="metrics-next" onclick="app.navigateMetrics(1)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="metrics-carousel" id="metrics-carousel">
+                    <div class="metric-slide active" data-index="0">
+                        <div class="metric-display">
+                            <div class="metric-icon-large" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div class="metric-content-large">
+                                <div class="metric-value-large">$${totalCheckingBalance.toFixed(0)}</div>
+                                <div class="metric-label-large">Checking Balance</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-item">
-                        <div class="metric-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                <circle cx="12" cy="12" r="2"/>
-                            </svg>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">$${totalSavingsBalance.toFixed(0)}</div>
-                            <div class="metric-label">Savings</div>
-                        </div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="8" cy="21" r="1"/>
-                                <circle cx="19" cy="21" r="1"/>
-                                <path d="m2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-                            </svg>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">$${monthlySubscriptions.toFixed(0)}</div>
-                            <div class="metric-label">Monthly Subs</div>
+                    <div class="metric-slide" data-index="1">
+                        <div class="metric-display">
+                            <div class="metric-icon-large" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                </svg>
+                            </div>
+                            <div class="metric-content-large">
+                                <div class="metric-value-large">$${totalSavingsBalance.toFixed(0)}</div>
+                                <div class="metric-label-large">Savings Balance</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-item">
-                        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                <path d="M9 12l2 2 4-4"/>
-                            </svg>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">$${monthlyInsurancePremiums.toFixed(0)}</div>
-                            <div class="metric-label">Insurance</div>
-                        </div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/>
-                                <path d="M9 8h6"/>
-                                <path d="M9 12h6"/>
-                                <path d="M9 16h4"/>
-                            </svg>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">$${totalUnpaidBills.toFixed(0)}</div>
-                            <div class="metric-label">Bills Due</div>
+                    <div class="metric-slide" data-index="2">
+                        <div class="metric-display">
+                            <div class="metric-icon-large" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="8" cy="21" r="1"/>
+                                    <circle cx="19" cy="21" r="1"/>
+                                    <path d="m2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                </svg>
+                            </div>
+                            <div class="metric-content-large">
+                                <div class="metric-value-large">$${monthlySubscriptions.toFixed(0)}</div>
+                                <div class="metric-label-large">Monthly Subscriptions</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-item">
-                        <div class="metric-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                <path d="M8 10l4 4"/>
-                                <path d="M16 14l-4-4"/>
-                            </svg>
+                    <div class="metric-slide" data-index="3">
+                        <div class="metric-display">
+                            <div class="metric-icon-large" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                            </div>
+                            <div class="metric-content-large">
+                                <div class="metric-value-large">$${monthlyInsurancePremiums.toFixed(0)}</div>
+                                <div class="metric-label-large">Insurance Premiums</div>
+                            </div>
                         </div>
-                        <div class="metric-content">
-                            <div class="metric-value" style="color: ${netWorth >= 0 ? '#22c55e' : '#ef4444'};">$${netWorth.toFixed(0)}</div>
-                            <div class="metric-label">Net Worth</div>
+                    </div>
+                    <div class="metric-slide" data-index="4">
+                        <div class="metric-display">
+                            <div class="metric-icon-large" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/>
+                                    <path d="M9 8h6"/>
+                                    <path d="M9 12h6"/>
+                                    <path d="M9 16h4"/>
+                                </svg>
+                            </div>
+                            <div class="metric-content-large">
+                                <div class="metric-value-large">$${totalUnpaidBills.toFixed(0)}</div>
+                                <div class="metric-label-large">Bills Due</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-slide" data-index="5">
+                        <div class="metric-display">
+                            <div class="metric-icon-large" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    <path d="M8 10l4 4"/>
+                                    <path d="M16 14l-4-4"/>
+                                </svg>
+                            </div>
+                            <div class="metric-content-large">
+                                <div class="metric-value-large" style="color: ${netWorth >= 0 ? '#22c55e' : '#ef4444'};">$${netWorth.toFixed(0)}</div>
+                                <div class="metric-label-large">Net Worth</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3124,6 +3240,7 @@ class HomeManagerApp {
         setTimeout(() => {
             this.loadRecentUpdatesState();
             this.loadActionItemsState();
+            this.initMetricsCarousel();
         }, 100);
         
         // Update notification badge
