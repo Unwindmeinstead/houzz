@@ -4739,6 +4739,258 @@ class HomeManagerApp {
         }
         return outputArray;
     }
+
+    // PIN Security Functions
+    hashPin(pin) {
+        // Simple hash function (in production, use a proper hashing library)
+        let hash = 0;
+        for (let i = 0; i < pin.length; i++) {
+            const char = pin.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash.toString();
+    }
+
+    isPinEnabled() {
+        return localStorage.getItem('pinEnabled') === 'true';
+    }
+
+    getPinHash() {
+        return localStorage.getItem('pinHash');
+    }
+
+    setPinHash(pin) {
+        const hash = this.hashPin(pin);
+        localStorage.setItem('pinHash', hash);
+    }
+
+    verifyPin(pin) {
+        const storedHash = this.getPinHash();
+        const enteredHash = this.hashPin(pin);
+        return storedHash === enteredHash;
+    }
+
+    showPinEntry() {
+        const overlay = document.getElementById('pin-entry-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+            this.pinEntry = '';
+            this.updatePinDots('entry');
+            document.getElementById('pin-entry-error').style.display = 'none';
+        }
+    }
+
+    hidePinEntry() {
+        const overlay = document.getElementById('pin-entry-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+            this.pinEntry = '';
+        }
+    }
+
+    pinKeypadInput(digit) {
+        HapticFeedback.light();
+        if (this.pinEntry.length < 4) {
+            this.pinEntry += digit;
+            this.updatePinDots('entry');
+            
+            if (this.pinEntry.length === 4) {
+                setTimeout(() => {
+                    if (this.verifyPin(this.pinEntry)) {
+                        HapticFeedback.success();
+                        this.hidePinEntry();
+                        // Initialize app after PIN verification
+                        this.setupEventListeners();
+                        this.renderHome();
+                        this.updateCategoryCounts();
+                        this.updateNotificationBadge();
+                        this.initNotifications();
+                        this.checkNotificationPermission();
+                        this.startNotificationChecker();
+                    } else {
+                        HapticFeedback.error();
+                        this.pinEntry = '';
+                        this.updatePinDots('entry');
+                        const errorEl = document.getElementById('pin-entry-error');
+                        errorEl.textContent = 'Incorrect PIN. Please try again.';
+                        errorEl.style.display = 'block';
+                        setTimeout(() => {
+                            errorEl.style.display = 'none';
+                        }, 3000);
+                    }
+                }, 100);
+            }
+        }
+    }
+
+    pinKeypadDelete() {
+        HapticFeedback.light();
+        if (this.pinEntry.length > 0) {
+            this.pinEntry = this.pinEntry.slice(0, -1);
+            this.updatePinDots('entry');
+        }
+    }
+
+    togglePinProtection() {
+        HapticFeedback.light();
+        const toggleSwitch = document.getElementById('pin-toggle-switch');
+        if (!toggleSwitch) return;
+
+        if (toggleSwitch.checked) {
+            // Enable PIN protection
+            if (!this.getPinHash()) {
+                // No PIN set, show setup modal
+                this.showPinSetupModal();
+            } else {
+                localStorage.setItem('pinEnabled', 'true');
+                this.updatePinUI();
+            }
+        } else {
+            // Disable PIN protection - require PIN to disable
+            this.showPinEntry();
+            const originalVerify = this.verifyPin.bind(this);
+            const originalKeypadInput = this.pinKeypadInput.bind(this);
+            
+            this.pinKeypadInput = (digit) => {
+                originalKeypadInput(digit);
+                if (this.pinEntry.length === 4) {
+                    setTimeout(() => {
+                        if (originalVerify(this.pinEntry)) {
+                            localStorage.setItem('pinEnabled', 'false');
+                            this.hidePinEntry();
+                            toggleSwitch.checked = false;
+                            this.updatePinUI();
+                            this.pinKeypadInput = originalKeypadInput; // Restore original
+                        }
+                    }, 100);
+                }
+            };
+        }
+    }
+
+    showPinSetupModal() {
+        const overlay = document.getElementById('pin-setup-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+            this.pinSetupStep = 'enter';
+            this.pinSetupEntered = '';
+            this.updatePinDots('setup');
+            document.getElementById('pin-setup-title').textContent = 'Set Up PIN';
+            document.getElementById('pin-setup-subtitle').textContent = 'Enter a 4-digit PIN';
+            document.getElementById('pin-setup-error').style.display = 'none';
+        }
+    }
+
+    closePinSetupModal() {
+        HapticFeedback.light();
+        const overlay = document.getElementById('pin-setup-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+            this.pinSetupStep = 'enter';
+            this.pinSetupEntered = '';
+            // Reset toggle if cancelled
+            const toggleSwitch = document.getElementById('pin-toggle-switch');
+            if (toggleSwitch && !this.getPinHash()) {
+                toggleSwitch.checked = false;
+            }
+        }
+    }
+
+    pinSetupKeypadInput(digit) {
+        HapticFeedback.light();
+        if (this.pinSetupEntered.length < 4) {
+            this.pinSetupEntered += digit;
+            this.updatePinDots('setup');
+            
+            if (this.pinSetupEntered.length === 4) {
+                if (this.pinSetupStep === 'enter') {
+                    // First PIN entered, ask for confirmation
+                    setTimeout(() => {
+                        this.pinSetupStep = 'confirm';
+                        const firstPin = this.pinSetupEntered;
+                        this.pinSetupEntered = '';
+                        this.updatePinDots('setup');
+                        document.getElementById('pin-setup-title').textContent = 'Confirm PIN';
+                        document.getElementById('pin-setup-subtitle').textContent = 'Re-enter your PIN to confirm';
+                        
+                        // Store first PIN temporarily
+                        this.tempPin = firstPin;
+                    }, 100);
+                } else {
+                    // Confirmation entered
+                    setTimeout(() => {
+                        if (this.pinSetupEntered === this.tempPin) {
+                            // PINs match
+                            HapticFeedback.success();
+                            this.setPinHash(this.pinSetupEntered);
+                            localStorage.setItem('pinEnabled', 'true');
+                            this.closePinSetupModal();
+                            this.updatePinUI();
+                            this.tempPin = null;
+                        } else {
+                            // PINs don't match
+                            HapticFeedback.error();
+                            this.pinSetupStep = 'enter';
+                            this.pinSetupEntered = '';
+                            this.updatePinDots('setup');
+                            this.tempPin = null;
+                            const errorEl = document.getElementById('pin-setup-error');
+                            errorEl.textContent = 'PINs do not match. Please try again.';
+                            errorEl.style.display = 'block';
+                            document.getElementById('pin-setup-title').textContent = 'Set Up PIN';
+                            document.getElementById('pin-setup-subtitle').textContent = 'Enter a 4-digit PIN';
+                            setTimeout(() => {
+                                errorEl.style.display = 'none';
+                            }, 3000);
+                        }
+                    }, 100);
+                }
+            }
+        }
+    }
+
+    pinSetupKeypadDelete() {
+        HapticFeedback.light();
+        if (this.pinSetupEntered.length > 0) {
+            this.pinSetupEntered = this.pinSetupEntered.slice(0, -1);
+            this.updatePinDots('setup');
+        }
+    }
+
+    updatePinDots(type) {
+        const prefix = type === 'entry' ? 'pin-dot' : 'pin-setup-dot';
+        const pin = type === 'entry' ? this.pinEntry : this.pinSetupEntered;
+        
+        for (let i = 1; i <= 4; i++) {
+            const dot = document.getElementById(`${prefix}-${i}`);
+            if (dot) {
+                if (i <= pin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            }
+        }
+    }
+
+    updatePinUI() {
+        const toggleSwitch = document.getElementById('pin-toggle-switch');
+        const statusDesc = document.getElementById('pin-status');
+        const setupOption = document.getElementById('pin-setup-option');
+        
+        if (!toggleSwitch || !statusDesc) return;
+
+        if (this.isPinEnabled()) {
+            toggleSwitch.checked = true;
+            statusDesc.textContent = 'PIN protection is enabled';
+            if (setupOption) setupOption.style.display = 'flex';
+        } else {
+            toggleSwitch.checked = false;
+            statusDesc.textContent = 'Protect your app with a PIN code';
+            if (setupOption) setupOption.style.display = 'none';
+        }
+    }
 }
 
 // Initialize app
