@@ -700,6 +700,8 @@ class HomeManagerApp {
             this.renderHome();
         } else if (tab === 'tasks') {
             this.renderTasks();
+        } else if (tab === 'insights') {
+            this.renderInsights();
         } else if (tab === 'insurances') {
             this.renderInsurances();
         } else if (tab === 'subscriptions') {
