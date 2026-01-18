@@ -277,18 +277,18 @@
                 </div>
                 <div class="pin-entry-error" id="pin-entry-error" style="display: none;"></div>
                 <div class="pin-keypad">
-                    <button class="pin-key" onclick="app.pinKeypadInput('1')">1</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('2')">2</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('3')">3</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('4')">4</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('5')">5</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('6')">6</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('7')">7</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('8')">8</button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('9')">9</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('1'); return false;" onclick="app.pinKeypadInput('1')">1</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('2'); return false;" onclick="app.pinKeypadInput('2')">2</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('3'); return false;" onclick="app.pinKeypadInput('3')">3</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('4'); return false;" onclick="app.pinKeypadInput('4')">4</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('5'); return false;" onclick="app.pinKeypadInput('5')">5</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('6'); return false;" onclick="app.pinKeypadInput('6')">6</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('7'); return false;" onclick="app.pinKeypadInput('7')">7</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('8'); return false;" onclick="app.pinKeypadInput('8')">8</button>
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('9'); return false;" onclick="app.pinKeypadInput('9')">9</button>
                     <button class="pin-key pin-key-empty"></button>
-                    <button class="pin-key" onclick="app.pinKeypadInput('0')">0</button>
-                    <button class="pin-key pin-key-delete" onclick="app.pinKeypadDelete()">
+                    <button class="pin-key" ontouchstart="app.pinKeypadInput('0'); return false;" onclick="app.pinKeypadInput('0')">0</button>
+                    <button class="pin-key pin-key-delete" ontouchstart="app.pinKeypadDelete(); return false;" onclick="app.pinKeypadDelete()">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
                             <line x1="18" y1="9" x2="12" y2="15"/>
@@ -320,18 +320,18 @@
                 </div>
                 <div class="pin-entry-error" id="pin-setup-error" style="display: none;"></div>
                 <div class="pin-keypad">
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('1')">1</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('2')">2</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('3')">3</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('4')">4</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('5')">5</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('6')">6</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('7')">7</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('8')">8</button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('9')">9</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('1'); return false;" onclick="app.pinSetupKeypadInput('1')">1</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('2'); return false;" onclick="app.pinSetupKeypadInput('2')">2</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('3'); return false;" onclick="app.pinSetupKeypadInput('3')">3</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('4'); return false;" onclick="app.pinSetupKeypadInput('4')">4</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('5'); return false;" onclick="app.pinSetupKeypadInput('5')">5</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('6'); return false;" onclick="app.pinSetupKeypadInput('6')">6</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('7'); return false;" onclick="app.pinSetupKeypadInput('7')">7</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('8'); return false;" onclick="app.pinSetupKeypadInput('8')">8</button>
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('9'); return false;" onclick="app.pinSetupKeypadInput('9')">9</button>
                     <button class="pin-key pin-key-empty"></button>
-                    <button class="pin-key" onclick="app.pinSetupKeypadInput('0')">0</button>
-                    <button class="pin-key pin-key-delete" onclick="app.pinSetupKeypadDelete()">
+                    <button class="pin-key" ontouchstart="app.pinSetupKeypadInput('0'); return false;" onclick="app.pinSetupKeypadInput('0')">0</button>
+                    <button class="pin-key pin-key-delete" ontouchstart="app.pinSetupKeypadDelete(); return false;" onclick="app.pinSetupKeypadDelete()">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
                             <line x1="18" y1="9" x2="12" y2="15"/>
