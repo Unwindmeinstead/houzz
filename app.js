@@ -2834,8 +2834,15 @@ class HomeManagerApp {
         const totalCheckingBalance = checking
             .reduce((sum, c) => sum + (parseFloat(c.balance) || 0), 0);
 
-        const totalSavingsBalance = savings
+        // Calculate savings balance from both savings category and financial entries
+        const savingsBalanceFromSavings = savings
             .reduce((sum, s) => sum + (parseFloat(s.balance) || 0), 0);
+
+        const savingsBalanceFromFinances = finances
+            .filter(f => f.type === 'cash' || f.type === '401k' || f.type === 'stocks')
+            .reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+
+        const totalSavingsBalance = savingsBalanceFromSavings + savingsBalanceFromFinances;
 
         const monthlySubscriptions = subscriptions
             .reduce((sum, sub) => {
