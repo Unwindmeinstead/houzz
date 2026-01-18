@@ -67,38 +67,10 @@ class HomeManagerApp {
         this.touchEndY = 0;
         this.minSwipeDistance = 50; // Minimum distance for a swipe
         this.maxVerticalDistance = 100; // Max vertical movement to still count as horizontal swipe
-        this.pinEntry = '';
-        this.pinSetupStep = 'enter'; // 'enter' or 'confirm'
-        this.pinSetupEntered = '';
         this.init();
     }
 
     init() {
-        // Read PIN state directly from localStorage
-        const pinEnabled = localStorage.getItem('pinEnabled');
-        const pinHash = localStorage.getItem('pinHash');
-        
-        // Normalize: if pinEnabled is not explicitly 'true', treat as disabled
-        const isPinEnabled = pinEnabled === 'true';
-        
-        // Show PIN entry ONLY if PIN is explicitly enabled AND hash exists
-        if (isPinEnabled && pinHash) {
-            this.showPinEntry();
-            return; // Don't initialize app until PIN is entered
-        }
-        
-        // PIN is disabled or not set - ensure overlay is hidden and continue initialization
-        const pinOverlay = document.getElementById('pin-entry-overlay');
-        if (pinOverlay) {
-            pinOverlay.style.display = 'none';
-        }
-        
-        // If PIN is not enabled, ensure state is explicitly set to 'false'
-        // This prevents any ambiguity about PIN state
-        if (!isPinEnabled) {
-            localStorage.setItem('pinEnabled', 'false');
-        }
-        
         this.setupEventListeners();
         this.renderHome();
         this.updateCategoryCounts();
@@ -106,7 +78,6 @@ class HomeManagerApp {
         this.initNotifications();
         this.checkNotificationPermission();
         this.startNotificationChecker();
-        this.updatePinUI();
     }
 
     openSettings() {
