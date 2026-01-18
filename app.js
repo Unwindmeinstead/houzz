@@ -1,3 +1,4 @@
+// App Version: 1.0.0 - PIN feature removed
 // Haptic Feedback Utility
 const HapticFeedback = {
     // Light impact (for taps)
