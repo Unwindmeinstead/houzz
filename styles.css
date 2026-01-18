@@ -3364,6 +3364,13 @@ body {
     border-radius: 50%;
     overflow: hidden;
     border: 3px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.profile-picture-container:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.02);
 }
 
 .profile-picture-container img {
@@ -3382,40 +3389,24 @@ body {
     color: rgba(255, 255, 255, 0.5);
 }
 
-.profile-picture-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.profile-action-btn {
+.profile-edit-overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    justify-content: center;
     color: var(--text-white);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
-.profile-action-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.profile-action-btn.danger {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-}
-
-.profile-action-btn.danger:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.4);
+.profile-picture-container:hover .profile-edit-overlay {
+    opacity: 1;
 }
 
 .profile-form {

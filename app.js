@@ -1780,7 +1780,7 @@ class HomeManagerApp {
                 </div>
                 <div class="profile-body">
                     <div class="profile-picture-section">
-                        <div class="profile-picture-container">
+                        <div class="profile-picture-container" onclick="document.getElementById('profile-picture-input').click(); HapticFeedback.medium();">
                             <img id="profile-preview" src="" alt="Profile Picture" style="display: none;" />
                             <div id="profile-placeholder" class="profile-placeholder">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1788,26 +1788,14 @@ class HomeManagerApp {
                                     <circle cx="12" cy="7" r="4"/>
                                 </svg>
                             </div>
-                        </div>
-                        <div class="profile-picture-actions">
-                            <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="app.handleProfilePictureChange(event)">
-                            <button class="profile-action-btn" onclick="document.getElementById('profile-picture-input').click(); HapticFeedback.medium();">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M14.828 14.828a4 4 0 0 1-5.656 0"/>
-                                    <path d="M9 10h1.586a1 1 0 0 1 .707.293l.707.707A1 1 0 0 0 12.414 11H15m-3-3h.01"/>
-                                    <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                            <div class="profile-edit-overlay">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                 </svg>
-                                Change Photo
-                            </button>
-                            <button class="profile-action-btn danger" onclick="app.removeProfilePicture(); HapticFeedback.warning();">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 6h18"/>
-                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                </svg>
-                                Remove
-                            </button>
+                            </div>
                         </div>
+                        <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="app.handleProfilePictureChange(event)">
                     </div>
                     <div class="profile-form">
                         <div class="form-group">
