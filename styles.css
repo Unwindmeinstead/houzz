@@ -443,7 +443,11 @@ body {
     }
 
     .metrics-nav {
-        justify-content: center;
+        justify-content: space-between;
+    }
+
+    .metrics-nav-btn {
+        display: none; /* Hide navigation buttons on mobile, use swipe gestures */
     }
 
     .metric-value-large {
