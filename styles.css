@@ -1570,7 +1570,7 @@ body {
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: var(--text-white) !important;
-    padding: 8px 12px !important;
+    padding: 3px 12px !important; /* 10px shorter height */
     font-size: 13px !important;
     font-weight: 600 !important;
 }
