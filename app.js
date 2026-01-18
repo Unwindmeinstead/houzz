@@ -4926,10 +4926,8 @@ class HomeManagerApp {
         HapticFeedback.light();
         if (this.pinEntry.length > 0) {
             this.pinEntry = this.pinEntry.slice(0, -1);
-            // Update dots immediately
-            requestAnimationFrame(() => {
-                this.updatePinDots('entry');
-            });
+            // Update dots immediately for instant visual feedback
+            this.updatePinDots('entry');
         }
     }
 
@@ -5063,10 +5061,8 @@ class HomeManagerApp {
         HapticFeedback.light();
         if (this.pinSetupEntered.length > 0) {
             this.pinSetupEntered = this.pinSetupEntered.slice(0, -1);
-            // Update dots immediately
-            requestAnimationFrame(() => {
-                this.updatePinDots('setup');
-            });
+            // Update dots immediately for instant visual feedback
+            this.updatePinDots('setup');
         }
     }
 
