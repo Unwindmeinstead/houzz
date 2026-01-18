@@ -1994,10 +1994,9 @@ class HomeManagerApp {
 
     navigateMetrics(direction) {
         const carousel = document.getElementById('metrics-carousel');
-        const indicators = document.querySelectorAll('.indicator');
         const slides = document.querySelectorAll('.metric-slide');
 
-        if (!carousel || !indicators.length || !slides.length) return;
+        if (!carousel || !slides.length) return;
 
         // Find current active slide
         let currentIndex = 0;
@@ -2015,11 +2014,6 @@ class HomeManagerApp {
         // Update slides
         slides.forEach((slide, index) => {
             slide.classList.toggle('active', index === newIndex);
-        });
-
-        // Update indicators
-        indicators.forEach((indicator, index) => {
-            indicator.classList.toggle('active', index === newIndex);
         });
 
         HapticFeedback.light();
@@ -2057,24 +2051,21 @@ class HomeManagerApp {
             e.stopPropagation(); // Prevent event bubbling to parent elements
         });
 
-        // Make indicators clickable
-        indicators.forEach((indicator, index) => {
-            indicator.addEventListener('click', () => {
+        // Make indicators clickable (delegate to carousel since indicators are inside slides)
+        carousel.addEventListener('click', (e) => {
+            if (e.target.classList.contains('indicator')) {
+                const targetIndex = parseInt(e.target.dataset.index);
                 const slides = document.querySelectorAll('.metric-slide');
                 const currentActive = document.querySelector('.metric-slide.active');
 
-                if (currentActive && parseInt(currentActive.dataset.index) !== index) {
+                if (currentActive && parseInt(currentActive.dataset.index) !== targetIndex) {
                     slides.forEach((slide, slideIndex) => {
-                        slide.classList.toggle('active', slideIndex === index);
-                    });
-
-                    indicators.forEach((ind, indIndex) => {
-                        ind.classList.toggle('active', indIndex === index);
+                        slide.classList.toggle('active', slideIndex === targetIndex);
                     });
 
                     HapticFeedback.light();
                 }
-            });
+            }
         });
     }
 
@@ -3180,32 +3171,20 @@ class HomeManagerApp {
                         </div>
                     </div>
                 </div>
-                <div class="metrics-nav">
-                    <button class="metrics-nav-btn" id="metrics-prev" onclick="app.navigateMetrics(-1)">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                    </button>
-                    <div class="metrics-indicators">
-                        <span class="indicator active" data-index="0"></span>
-                        <span class="indicator" data-index="1"></span>
-                        <span class="indicator" data-index="2"></span>
-                        <span class="indicator" data-index="3"></span>
-                        <span class="indicator" data-index="4"></span>
-                        <span class="indicator" data-index="5"></span>
-                    </div>
-                    <button class="metrics-nav-btn" id="metrics-next" onclick="app.navigateMetrics(1)">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                </div>
                 <div class="metrics-carousel" id="metrics-carousel">
                     <div class="metric-slide active" data-index="0">
                         <div class="metric-display">
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${totalCheckingBalance.toFixed(0)}</div>
                                 <div class="metric-label-large">Checking Balance</div>
+                            </div>
+                            <div class="metric-indicators">
+                                <span class="indicator active" data-index="0"></span>
+                                <span class="indicator" data-index="1"></span>
+                                <span class="indicator" data-index="2"></span>
+                                <span class="indicator" data-index="3"></span>
+                                <span class="indicator" data-index="4"></span>
+                                <span class="indicator" data-index="5"></span>
                             </div>
                         </div>
                     </div>
@@ -3215,6 +3194,14 @@ class HomeManagerApp {
                                 <div class="metric-value-large">$${totalSavingsBalance.toFixed(0)}</div>
                                 <div class="metric-label-large">Savings Balance</div>
                             </div>
+                            <div class="metric-indicators">
+                                <span class="indicator active" data-index="0"></span>
+                                <span class="indicator" data-index="1"></span>
+                                <span class="indicator" data-index="2"></span>
+                                <span class="indicator" data-index="3"></span>
+                                <span class="indicator" data-index="4"></span>
+                                <span class="indicator" data-index="5"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="metric-slide" data-index="2">
@@ -3222,6 +3209,14 @@ class HomeManagerApp {
                             <div class="metric-content-large">
                                 <div class="metric-value-large">$${monthlySubscriptions.toFixed(0)}</div>
                                 <div class="metric-label-large">Monthly Subscriptions</div>
+                            </div>
+                            <div class="metric-indicators">
+                                <span class="indicator active" data-index="0"></span>
+                                <span class="indicator" data-index="1"></span>
+                                <span class="indicator" data-index="2"></span>
+                                <span class="indicator" data-index="3"></span>
+                                <span class="indicator" data-index="4"></span>
+                                <span class="indicator" data-index="5"></span>
                             </div>
                         </div>
                     </div>
@@ -3231,6 +3226,14 @@ class HomeManagerApp {
                                 <div class="metric-value-large">$${monthlyInsurancePremiums.toFixed(0)}</div>
                                 <div class="metric-label-large">Insurance Premiums</div>
                             </div>
+                            <div class="metric-indicators">
+                                <span class="indicator active" data-index="0"></span>
+                                <span class="indicator" data-index="1"></span>
+                                <span class="indicator" data-index="2"></span>
+                                <span class="indicator" data-index="3"></span>
+                                <span class="indicator" data-index="4"></span>
+                                <span class="indicator" data-index="5"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="metric-slide" data-index="4">
@@ -3239,6 +3242,14 @@ class HomeManagerApp {
                                 <div class="metric-value-large">$${totalUnpaidBills.toFixed(0)}</div>
                                 <div class="metric-label-large">Bills Due</div>
                             </div>
+                            <div class="metric-indicators">
+                                <span class="indicator active" data-index="0"></span>
+                                <span class="indicator" data-index="1"></span>
+                                <span class="indicator" data-index="2"></span>
+                                <span class="indicator" data-index="3"></span>
+                                <span class="indicator" data-index="4"></span>
+                                <span class="indicator" data-index="5"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="metric-slide" data-index="5">
@@ -3246,6 +3257,14 @@ class HomeManagerApp {
                             <div class="metric-content-large">
                                 <div class="metric-value-large" style="color: ${netWorth >= 0 ? '#22c55e' : '#ef4444'};">$${netWorth.toFixed(0)}</div>
                                 <div class="metric-label-large">Net Worth</div>
+                            </div>
+                            <div class="metric-indicators">
+                                <span class="indicator active" data-index="0"></span>
+                                <span class="indicator" data-index="1"></span>
+                                <span class="indicator" data-index="2"></span>
+                                <span class="indicator" data-index="3"></span>
+                                <span class="indicator" data-index="4"></span>
+                                <span class="indicator" data-index="5"></span>
                             </div>
                         </div>
                     </div>
