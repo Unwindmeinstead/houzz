@@ -4826,8 +4826,7 @@ class HomeManagerApp {
         }
         return outputArray;
     }
-
-    // PIN Security Functions
+}
     hashPin(pin) {
         // Simple hash function (in production, use a proper hashing library)
         let hash = 0;
