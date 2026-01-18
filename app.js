@@ -4829,8 +4829,15 @@ class HomeManagerApp {
     }
 }
 
-// Initialize app
-const app = new HomeManagerApp();
+// Initialize app when DOM is ready
+let app;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        app = new HomeManagerApp();
+    });
+} else {
+    app = new HomeManagerApp();
+}
 
 // Prevent default touch behaviors
 document.addEventListener('touchstart', (e) => {
