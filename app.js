@@ -1481,8 +1481,8 @@ class HomeManagerApp {
                         } else if (category === 'insurances') {
                             items = storage.getAll('insurances') || [];
                         }
-                        if (items[index]) {
-                            this.openAddModal(category, items[index]);
+                    if (items[index]) {
+                        this.openAddModal(category, items[index]);
                         }
                     }
                 });
@@ -2859,8 +2859,16 @@ class HomeManagerApp {
 
             <!-- Quick Access Cards -->
             <div class="home-section">
-                <h2 class="home-section-title">Quick Access</h2>
-                <div class="quick-access-grid">
+                <h2 class="home-section-title collapsible-title">
+                    <span onclick="app.toggleQuickAccessSection()" style="flex: 1; display: flex; align-items: center; gap: 8px;">
+                        <span>Quick Access</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-indicator" id="quick-access-indicator">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </span>
+                </h2>
+                <div class="quick-access-container" id="quick-access-container">
+                    <div class="quick-access-grid">
                     <button class="quick-access-card" onclick="HapticFeedback.medium(); app.switchView('cars')">
                         <div class="quick-access-icon">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2905,6 +2913,7 @@ class HomeManagerApp {
                         </div>
                         <div class="quick-access-label">Add New</div>
                     </button>
+                    </div>
                 </div>
             </div>
 
@@ -4253,9 +4262,9 @@ class HomeManagerApp {
                         `;
                     } else {
                         const finance = entry;
-                        const isIncome = finance.type === 'income';
-                        const amount = parseFloat(finance.amount || 0);
-                        const date = finance.date ? new Date(finance.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+                    const isIncome = finance.type === 'income';
+                    const amount = parseFloat(finance.amount || 0);
+                    const date = finance.date ? new Date(finance.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
                         
                         // Get finance category display name
                         const categoryMap = {
@@ -4267,16 +4276,16 @@ class HomeManagerApp {
                         const financeCategory = finance.financeCategory || finance.category || '';
                         const categoryDisplay = categoryMap[financeCategory] || financeCategory || 'Transaction';
                         
-                        return `
+                    return `
                             <div class="item-card" data-category="finances" data-index="${index}" data-item-id="${finance.id}">
-                                <div class="item-card-header">
-                                    <div>
+                            <div class="item-card-header">
+                                <div>
                                         <div class="item-card-title">${finance.description || categoryDisplay}</div>
-                                        <div class="item-card-subtitle">${date}</div>
-                                    </div>
+                                    <div class="item-card-subtitle">${date}</div>
+                                </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <div class="item-card-badge finance-category-badge" data-category="${financeCategory}">${categoryDisplay}</div>
-                                    <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
+                                <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
                                         <button class="item-delete-btn" data-category="finances" data-item-id="${finance.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('finances', '${finance.id}', '${(finance.description || categoryDisplay).replace(/'/g, "\\'")}')" title="Delete">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M3 6h18"/>
@@ -4285,9 +4294,9 @@ class HomeManagerApp {
                                             </svg>
                                         </button>
                                     </div>
-                                </div>
-                                <div class="item-card-amount ${isIncome ? 'positive' : 'negative'}">
-                                    ${isIncome ? '+' : '-'}$${Math.abs(amount).toFixed(2)}
+                            </div>
+                            <div class="item-card-amount ${isIncome ? 'positive' : 'negative'}">
+                                ${isIncome ? '+' : '-'}$${Math.abs(amount).toFixed(2)}
                                 </div>
                             </div>
                         `;
