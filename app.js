@@ -2806,125 +2806,23 @@ class HomeManagerApp {
                 }
             }, 0);
 
-        // Calculate total available funds (cash + checking)
-        const totalCash = finances
-            .filter(f => f.category === 'cash')
-            .reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
-        const totalAvailableFunds = totalCash + totalCheckingBalance;
-
-        // Calculate total unpaid bills due this month
-        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        const unpaidBillsThisMonth = bills.filter(bill => {
-            if (bill.paid) return false;
-            const dueDate = new Date(bill.dueDate);
-            return dueDate <= endOfMonth;
-        });
-        const totalBillsDue = unpaidBillsThisMonth.reduce((sum, bill) => {
-            return sum + (parseFloat(bill.amount) || 0);
-        }, 0);
-
-        // Calculate shortfall
-        const shortfall = totalBillsDue - totalAvailableFunds;
-        const hasShortfall = shortfall > 0;
-
-        // Find next urgent bill (due soonest)
-        const unpaidBillsSorted = bills
-            .filter(bill => !bill.paid)
-            .map(bill => ({
-                ...bill,
-                dueDate: new Date(bill.dueDate)
-            }))
-            .sort((a, b) => a.dueDate - b.dueDate);
-
-        const nextUrgentBill = unpaidBillsSorted[0];
-        let timeUntilDue = null;
-        let hoursUntilDue = null;
-        let lateFee = 0;
-
-        if (nextUrgentBill) {
-            const now = new Date();
-            const dueDate = new Date(nextUrgentBill.dueDate);
-            const diffMs = dueDate - now;
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            
-            hoursUntilDue = diffHours;
-            if (diffHours < 24) {
-                timeUntilDue = `${diffHours} hrs`;
-            } else {
-                const days = Math.floor(diffHours / 24);
-                timeUntilDue = `${days} days`;
-            }
-
-            // Calculate late fee if overdue (example: 5% or $25 minimum)
-            if (diffMs < 0) {
-                const billAmount = parseFloat(nextUrgentBill.amount) || 0;
-                lateFee = Math.max(25, billAmount * 0.05);
-            }
-        }
-
-        // Get streak (days in control - consecutive days without overdue bills)
-        const streak = this.getControlStreak();
-
-        // Calculate total cash for display (cash category + checking)
-        const displayCash = totalCash + totalCheckingBalance;
-
         container.innerHTML = `
-            <!-- Critical Financial Alert Card -->
-            ${hasShortfall && nextUrgentBill ? `
-            <div class="critical-alert-card">
-                <div class="critical-alert-header">
-                    <div class="warning-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                            <line x1="12" y1="9" x2="12" y2="13"/>
-                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                        </svg>
-                    </div>
-                    <div class="critical-alert-content">
-                        <div class="critical-alert-title">You are <span class="shortfall-amount">$${shortfall.toFixed(0)}</span> short to clear bills this month</div>
-                        ${nextUrgentBill ? `
-                        <div class="next-bill-info">
-                            <span>Next unpaid: <strong>$${parseFloat(nextUrgentBill.amount || 0).toFixed(2)} ${nextUrgentBill.name || 'bill'}</strong> due in <span class="time-urgent">${timeUntilDue}</span></span>
-                            ${lateFee > 0 ? `<span class="late-fee">$${lateFee.toFixed(0)} late fee</span>` : ''}
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-                <button class="fix-this-now-btn" onclick="HapticFeedback.medium(); app.switchView('bills')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                    <span>Fix This Now</span>
-                </button>
-                ${streak > 0 ? `
-                <div class="control-streak">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                    <span>${streak} DAY${streak !== 1 ? 'S' : ''} IN CONTROL ></span>
-                </div>
-                ` : ''}
-            </div>
-            ` : ''}
-
-            <!-- Summary Cards (Simplified - 3 cards) -->
-            <div class="summary-cards-scroll-container">
-                <div class="summary-cards-scroll">
+            <!-- Summary Cards -->
+            <div class="home-summary-grid">
                 <div class="summary-card">
-                    <div class="summary-card-icon cash-icon">
+                    <div class="summary-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                            <path d="M16 21V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16"/>
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value cash-value">$${displayCash.toFixed(0)}</div>
-                        <div class="summary-card-label">Cash</div>
+                        <div class="summary-card-value">${pendingTasks}</div>
+                        <div class="summary-card-label">Pending Tasks</div>
                     </div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-card-icon bills-icon">
+                    <div class="summary-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
                             <path d="M9 8h6" />
@@ -2933,27 +2831,60 @@ class HomeManagerApp {
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value bills-value">${unpaidBills} due</div>
-                        <div class="summary-card-label">Bills</div>
+                        <div class="summary-card-value">${unpaidBills}</div>
+                        <div class="summary-card-label">Unpaid Bills</div>
                     </div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-card-icon tasks-icon">
+                    <div class="summary-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 11l3 3L22 4" />
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                            <path d="M12 3v18" />
+                            <path d="M16 7.5c0-1.9-1.8-3.5-4-3.5s-4 1.6-4 3.5 1.8 3.5 4 3.5 4 1.6 4 3.5-1.8 3.5-4 3.5-4-1.6-4-3.5" />
                         </svg>
                     </div>
                     <div class="summary-card-content">
-                        <div class="summary-card-value tasks-value">${pendingTasks}</div>
-                        <div class="summary-card-label">Tasks</div>
+                        <div class="summary-card-value">$${(totalIncome - totalExpense).toFixed(0)}</div>
+                        <div class="summary-card-label">Balance</div>
                     </div>
                 </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <line x1="6" y1="8" x2="18" y2="8"/>
+                            <line x1="6" y1="12" x2="18" y2="12"/>
+                            <line x1="6" y1="16" x2="14" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value">$${totalCheckingBalance.toFixed(2)}</div>
+                        <div class="summary-card-label">Checking</div>
+                    </div>
                 </div>
-                <div class="summary-cards-pagination">
-                    <span class="pagination-dot active"></span>
-                    <span class="pagination-dot"></span>
-                    <span class="pagination-dot"></span>
+                <div class="summary-card">
+                    <div class="summary-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 16v-3l2-5h14l2 5v3" />
+                            <path d="M5 16h14" />
+                            <circle cx="7.5" cy="16.5" r="1.5" />
+                            <circle cx="16.5" cy="16.5" r="1.5" />
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value">$${totalCarLoan.toFixed(2)}</div>
+                        <div class="summary-card-label">Car Loan</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <div class="summary-card-content">
+                        <div class="summary-card-value">$${totalSubscriptions.toFixed(2)}</div>
+                        <div class="summary-card-label">Subscriptions</div>
+                    </div>
                 </div>
             </div>
 
@@ -4903,51 +4834,6 @@ class HomeManagerApp {
             outputArray[i] = rawData.charCodeAt(i);
         }
         return outputArray;
-    }
-
-    getControlStreak() {
-        // Calculate consecutive days without overdue bills
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        let streak = 0;
-        const bills = storage.getBills();
-        
-        // Check each day going backwards
-        for (let daysAgo = 0; daysAgo < 365; daysAgo++) {
-            const checkDate = new Date(today);
-            checkDate.setDate(checkDate.getDate() - daysAgo);
-            checkDate.setHours(0, 0, 0, 0);
-            
-            // Find bills that were due on this date and are still unpaid
-            const billsDueOnDate = bills.filter(bill => {
-                if (bill.paid) return false;
-                const dueDate = new Date(bill.dueDate);
-                dueDate.setHours(0, 0, 0, 0);
-                return dueDate.getTime() === checkDate.getTime() && checkDate < today;
-            });
-            
-            // If there are unpaid bills due on this date, streak is broken
-            if (billsDueOnDate.length > 0) {
-                break;
-            }
-            
-            // If we're checking today or future dates, continue
-            if (checkDate >= today) {
-                continue;
-            }
-            
-            // This day had no overdue bills, increment streak
-            streak++;
-        }
-        
-        // Store streak in localStorage for persistence
-        const lastStreak = parseInt(localStorage.getItem('controlStreak') || '0');
-        if (streak > lastStreak) {
-            localStorage.setItem('controlStreak', streak.toString());
-        }
-        
-        return Math.max(streak, parseInt(localStorage.getItem('controlStreak') || '0'));
     }
 }
 
