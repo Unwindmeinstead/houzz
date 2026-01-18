@@ -3064,15 +3064,7 @@ class HomeManagerApp {
         // Setup event listeners for upcoming items and open tasks
         setTimeout(() => {
             // Calendar day clicks
-            document.querySelectorAll('.calendar-day[data-day]').forEach(day => {
-                day.addEventListener('click', () => {
-                    const dayNum = day.getAttribute('data-day');
-                    const month = day.getAttribute('data-month');
-                    const year = day.getAttribute('data-year');
-                    const dateStr = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-                    this.showDateEntryMenu(dateStr);
-                });
-            });
+            // Calendar day clicks are handled via onclick in the HTML, no need for additional listeners
             
             // Open task checkboxes
             document.querySelectorAll('.open-task-checkbox').forEach(checkbox => {
@@ -4046,13 +4038,21 @@ class HomeManagerApp {
         if (!container) return;
         
         const finances = storage.getFinances();
-        const sortedFinances = [...finances].sort((a, b) => {
-            const dateA = new Date(a.date || 0);
-            const dateB = new Date(b.date || 0);
+        const checking = storage.getAll('checking') || [];
+        
+        // Combine finances and checking entries
+        const allEntries = [
+            ...finances.map(f => ({ ...f, entryType: 'finance' })),
+            ...checking.map(c => ({ ...c, entryType: 'checking' }))
+        ];
+        
+        const sortedEntries = [...allEntries].sort((a, b) => {
+            const dateA = a.date ? new Date(a.date) : (a.createdAt ? new Date(a.createdAt) : new Date(0));
+            const dateB = b.date ? new Date(b.date) : (b.createdAt ? new Date(b.createdAt) : new Date(0));
             return dateB - dateA;
         });
         
-        if (finances.length === 0) {
+        if (allEntries.length === 0) {
             container.innerHTML = `
                 <div class="category-view-header">
                     <div>
@@ -4096,7 +4096,7 @@ class HomeManagerApp {
             <div class="category-view-header">
                 <div>
                 <h2 class="category-view-title">Finance</h2>
-                <p class="category-view-subtitle">${finances.length} transaction${finances.length !== 1 ? 's' : ''}</p>
+                <p class="category-view-subtitle">${allEntries.length} entr${allEntries.length !== 1 ? 'ies' : 'y'}</p>
             </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${this.renderViewToggle()}
@@ -4111,45 +4111,78 @@ class HomeManagerApp {
             </div>
             ${this.renderFinanceMetrics(finances)}
             <div class="items-grid view-mode-${this.cardViewMode}">
-                ${sortedFinances.map((finance, index) => {
-                    const isIncome = finance.type === 'income';
-                    const amount = parseFloat(finance.amount || 0);
-                    const date = finance.date ? new Date(finance.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+                ${sortedEntries.map((entry, index) => {
+                    const isFinance = entry.entryType === 'finance';
+                    const isChecking = entry.entryType === 'checking';
                     
-                    // Get finance category display name
-                    const categoryMap = {
-                        'cash': 'Cash',
-                        'stocks': 'Stocks',
-                        '401k': '401k',
-                        'savings': 'Savings'
-                    };
-                    const financeCategory = finance.financeCategory || finance.category || '';
-                    const categoryDisplay = categoryMap[financeCategory] || financeCategory || 'Transaction';
-                    
-                    return `
-                        <div class="item-card" data-category="finances" data-index="${index}" data-item-id="${finance.id}">
-                            <div class="item-card-header">
-                                <div>
-                                    <div class="item-card-title">${finance.description || categoryDisplay}</div>
-                                    <div class="item-card-subtitle">${date}</div>
+                    if (isChecking) {
+                        const balance = parseFloat(entry.balance || 0);
+                        const date = entry.createdAt ? new Date(entry.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+                        
+                        return `
+                            <div class="item-card" data-category="checking" data-index="${index}" data-item-id="${entry.id}">
+                                <div class="item-card-header">
+                                    <div>
+                                        <div class="item-card-title">Checking Account</div>
+                                        <div class="item-card-subtitle">${date}</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div class="item-card-badge">Checking</div>
+                                        <button class="item-delete-btn" data-category="checking" data-item-id="${entry.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('checking', '${entry.id}', 'Checking Account')" title="Delete">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 6h18"/>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div class="item-card-badge finance-category-badge" data-category="${financeCategory}">${categoryDisplay}</div>
-                                <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
-                                    <button class="item-delete-btn" data-category="finances" data-item-id="${finance.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('finances', '${finance.id}', '${(finance.description || categoryDisplay).replace(/'/g, "\\'")}')" title="Delete">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 6h18"/>
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                        </svg>
-                                    </button>
+                                <div class="item-card-amount positive">
+                                    $${balance.toFixed(2)}
                                 </div>
                             </div>
-                            <div class="item-card-amount ${isIncome ? 'positive' : 'negative'}">
-                                ${isIncome ? '+' : '-'}$${Math.abs(amount).toFixed(2)}
+                        `;
+                    } else {
+                        const finance = entry;
+                        const isIncome = finance.type === 'income';
+                        const amount = parseFloat(finance.amount || 0);
+                        const date = finance.date ? new Date(finance.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+                        
+                        // Get finance category display name
+                        const categoryMap = {
+                            'cash': 'Cash',
+                            'stocks': 'Stocks',
+                            '401k': '401k',
+                            'savings': 'Savings'
+                        };
+                        const financeCategory = finance.financeCategory || finance.category || '';
+                        const categoryDisplay = categoryMap[financeCategory] || financeCategory || 'Transaction';
+                        
+                        return `
+                            <div class="item-card" data-category="finances" data-index="${index}" data-item-id="${finance.id}">
+                                <div class="item-card-header">
+                                    <div>
+                                        <div class="item-card-title">${finance.description || categoryDisplay}</div>
+                                        <div class="item-card-subtitle">${date}</div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div class="item-card-badge finance-category-badge" data-category="${financeCategory}">${categoryDisplay}</div>
+                                    <div class="item-card-badge">${isIncome ? 'Income' : 'Expense'}</div>
+                                        <button class="item-delete-btn" data-category="finances" data-item-id="${finance.id}" onclick="event.stopPropagation(); HapticFeedback.warning(); app.confirmDelete('finances', '${finance.id}', '${(finance.description || categoryDisplay).replace(/'/g, "\\'")}')" title="Delete">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 6h18"/>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="item-card-amount ${isIncome ? 'positive' : 'negative'}">
+                                    ${isIncome ? '+' : '-'}$${Math.abs(amount).toFixed(2)}
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }).join('')}
             </div>
         `;
