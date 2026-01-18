@@ -5187,35 +5187,8 @@ class HomeManagerApp {
     }
 
     updatePinUI() {
-        const toggleSwitch = document.getElementById('pin-toggle-switch');
-        const statusDesc = document.getElementById('pin-status');
-        const setupOption = document.getElementById('pin-setup-option');
-        
-        if (!toggleSwitch || !statusDesc) return;
-
-        // Read directly from localStorage - use same logic as init()
-        const pinEnabled = localStorage.getItem('pinEnabled');
-        const pinHash = localStorage.getItem('pinHash');
-        const isPinEnabled = pinEnabled === 'true' && pinHash;
-
-        if (isPinEnabled) {
-            toggleSwitch.checked = true;
-            statusDesc.textContent = 'PIN protection is enabled';
-            if (setupOption) setupOption.style.display = 'flex';
-        } else {
-            toggleSwitch.checked = false;
-            statusDesc.textContent = 'Protect your app with a PIN code';
-            if (setupOption) setupOption.style.display = 'none';
-            // If PIN is disabled, ensure overlay is hidden
-            const pinOverlay = document.getElementById('pin-entry-overlay');
-            if (pinOverlay) {
-                pinOverlay.style.display = 'none';
-            }
-            // Ensure state is explicitly set to 'false' if not already set
-            if (pinEnabled !== 'false') {
-                localStorage.setItem('pinEnabled', 'false');
-            }
-        }
+        // Use the same function that prevents event loops
+        this.updatePinUIWithoutEvent();
     }
 }
 
