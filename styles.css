@@ -255,6 +255,196 @@ body {
 }
 
 /* Home Page Styles */
+
+/* Critical Financial Alert Card */
+.critical-alert-card {
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.critical-alert-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.warning-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.critical-alert-content {
+    flex: 1;
+}
+
+.critical-alert-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shortfall-amount {
+    color: #ef4444;
+    font-weight: 800;
+}
+
+.next-bill-info {
+    font-size: 14px;
+    color: var(--text-gray);
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.next-bill-info strong {
+    color: var(--text-white);
+    font-weight: 600;
+}
+
+.time-urgent {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.late-fee {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+}
+
+.fix-this-now-btn {
+    width: 100%;
+    padding: 14px 20px;
+    background: #ef4444;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.fix-this-now-btn:active {
+    transform: scale(0.98);
+    background: #dc2626;
+}
+
+.fix-this-now-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.control-streak {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4ade80;
+    margin-top: 8px;
+}
+
+.control-streak svg {
+    width: 16px;
+    height: 16px;
+    color: #4ade80;
+}
+
+/* Summary Cards - Horizontal Scroll */
+.summary-cards-scroll-container {
+    margin-bottom: 24px;
+}
+
+.summary-cards-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 8px;
+}
+
+.summary-cards-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.summary-cards-scroll .summary-card {
+    flex: 0 0 calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    scroll-snap-align: start;
+}
+
+.summary-cards-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.pagination-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
+}
+
+.pagination-dot.active {
+    background: var(--text-white);
+    width: 20px;
+    border-radius: 3px;
+}
+
+.summary-card-icon.cash-icon {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.summary-card-icon.bills-icon {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+}
+
+.summary-card-icon.tasks-icon {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-white);
+}
+
+.summary-card-value.cash-value {
+    color: #22c55e;
+}
+
+.summary-card-value.bills-value {
+    color: #fbbf24;
+}
+
+.summary-card-value.tasks-value {
+    color: var(--text-white);
+}
+
 .home-summary-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
