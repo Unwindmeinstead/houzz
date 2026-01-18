@@ -4839,12 +4839,21 @@ class HomeManagerApp {
 
 // Initialize app when DOM is ready
 let app;
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
+    try {
+        console.log('Initializing HomeManagerApp...');
         app = new HomeManagerApp();
-    });
+        console.log('HomeManagerApp initialized successfully');
+    } catch (error) {
+        console.error('Error initializing app:', error);
+        alert('Error loading app: ' + error.message);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
 } else {
-    app = new HomeManagerApp();
+    initApp();
 }
 
 // Prevent default touch behaviors
