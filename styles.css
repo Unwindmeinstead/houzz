@@ -1566,7 +1566,7 @@ body {
 
 /* Individual item delete confirmation buttons */
 .delete-confirm-actions .cancel-btn {
-    flex: 2 !important; /* Make cancel button bigger */
+    flex: 1 !important; /* Same size as delete button */
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: var(--text-white) !important;
