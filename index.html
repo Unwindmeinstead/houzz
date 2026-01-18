@@ -262,6 +262,86 @@
             </div>
         </div>
 
+        <!-- PIN Entry Overlay -->
+        <div class="overlay" id="pin-entry-overlay" style="display: none;">
+            <div class="overlay-content pin-entry-content">
+                <div class="pin-entry-header">
+                    <h2>Enter PIN</h2>
+                    <p class="pin-entry-subtitle">Enter your PIN to access the app</p>
+                </div>
+                <div class="pin-entry-display">
+                    <div class="pin-dot" id="pin-dot-1"></div>
+                    <div class="pin-dot" id="pin-dot-2"></div>
+                    <div class="pin-dot" id="pin-dot-3"></div>
+                    <div class="pin-dot" id="pin-dot-4"></div>
+                </div>
+                <div class="pin-entry-error" id="pin-entry-error" style="display: none;"></div>
+                <div class="pin-keypad">
+                    <button class="pin-key" onclick="app.pinKeypadInput('1')">1</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('2')">2</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('3')">3</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('4')">4</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('5')">5</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('6')">6</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('7')">7</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('8')">8</button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('9')">9</button>
+                    <button class="pin-key pin-key-empty"></button>
+                    <button class="pin-key" onclick="app.pinKeypadInput('0')">0</button>
+                    <button class="pin-key pin-key-delete" onclick="app.pinKeypadDelete()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+                            <line x1="18" y1="9" x2="12" y2="15"/>
+                            <line x1="12" y1="9" x2="18" y2="15"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PIN Setup Overlay -->
+        <div class="overlay" id="pin-setup-overlay" style="display: none;">
+            <div class="overlay-content pin-setup-content">
+                <div class="pin-setup-header">
+                    <h2 id="pin-setup-title">Set Up PIN</h2>
+                    <p class="pin-setup-subtitle" id="pin-setup-subtitle">Enter a 4-digit PIN to secure your app</p>
+                    <button class="pin-setup-close" onclick="app.closePinSetupModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-entry-display">
+                    <div class="pin-dot" id="pin-setup-dot-1"></div>
+                    <div class="pin-dot" id="pin-setup-dot-2"></div>
+                    <div class="pin-dot" id="pin-setup-dot-3"></div>
+                    <div class="pin-dot" id="pin-setup-dot-4"></div>
+                </div>
+                <div class="pin-entry-error" id="pin-setup-error" style="display: none;"></div>
+                <div class="pin-keypad">
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('1')">1</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('2')">2</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('3')">3</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('4')">4</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('5')">5</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('6')">6</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('7')">7</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('8')">8</button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('9')">9</button>
+                    <button class="pin-key pin-key-empty"></button>
+                    <button class="pin-key" onclick="app.pinSetupKeypadInput('0')">0</button>
+                    <button class="pin-key pin-key-delete" onclick="app.pinSetupKeypadDelete()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+                            <line x1="18" y1="9" x2="12" y2="15"/>
+                            <line x1="12" y1="9" x2="18" y2="15"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-view="home" aria-label="Home">
