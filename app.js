@@ -503,6 +503,16 @@ class HomeManagerApp {
             }
         });
 
+        // Profile settings button (delegated event listener)
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.profile-settings-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                HapticFeedback.medium();
+                this.openProfileSettings();
+            }
+        });
+
         // View toggle buttons (delegated event listener)
         document.addEventListener('click', (e) => {
             if (e.target.closest('.view-toggle-btn')) {
