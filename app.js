@@ -5041,10 +5041,13 @@ class HomeManagerApp {
             overlay.style.display = 'none';
             this.pinSetupStep = 'enter';
             this.pinSetupEntered = '';
-            // Reset toggle if cancelled
+            // Reset toggle if cancelled and no PIN hash exists
             const toggleSwitch = document.getElementById('pin-toggle-switch');
             if (toggleSwitch && !this.getPinHash()) {
                 toggleSwitch.checked = false;
+                // Ensure PIN is disabled if setup was cancelled
+                localStorage.setItem('pinEnabled', 'false');
+                this.updatePinUI();
             }
         }
     }
