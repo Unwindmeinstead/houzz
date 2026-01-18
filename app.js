@@ -4975,12 +4975,16 @@ class HomeManagerApp {
                 this.showPinSetupModal();
             } else {
                 localStorage.setItem('pinEnabled', 'true');
-                this.updatePinUI();
+                // Update UI without triggering change event
+                this.updatePinUIWithoutEvent();
             }
         } else {
             // Disable PIN protection
             if (this.getPinHash()) {
                 // PIN exists, require verification to disable
+                // Temporarily revert toggle to prevent state confusion
+                toggleSwitch.checked = true;
+                
                 this.showPinEntry();
                 const originalVerify = this.verifyPin.bind(this);
                 const originalKeypadInput = this.pinKeypadInput.bind(this);
@@ -4990,11 +4994,13 @@ class HomeManagerApp {
                     if (this.pinEntry.length === 4) {
                         requestAnimationFrame(() => {
                             if (originalVerify(this.pinEntry)) {
+                                // Correct PIN - disable protection
                                 localStorage.setItem('pinEnabled', 'false');
                                 this.hidePinEntry();
-                                toggleSwitch.checked = false;
-                                this.updatePinUI();
-                                this.pinKeypadInput = originalKeypadInput; // Restore original
+                                // Restore original function before updating UI
+                                this.pinKeypadInput = originalKeypadInput;
+                                // Update UI without triggering change event
+                                this.updatePinUIWithoutEvent();
                             } else {
                                 // Wrong PIN, clear and show error
                                 HapticFeedback.error();
@@ -5008,8 +5014,8 @@ class HomeManagerApp {
                                         errorEl.style.display = 'none';
                                     }, 3000);
                                 }
-                                toggleSwitch.checked = true; // Revert toggle
-                                this.updatePinUI();
+                                // Toggle is already set to true, just update UI
+                                this.updatePinUIWithoutEvent();
                             }
                         });
                     }
@@ -5017,8 +5023,49 @@ class HomeManagerApp {
             } else {
                 // No PIN set, just disable directly
                 localStorage.setItem('pinEnabled', 'false');
-                this.updatePinUI();
+                this.updatePinUIWithoutEvent();
             }
+        }
+    }
+
+    updatePinUIWithoutEvent() {
+        const toggleSwitch = document.getElementById('pin-toggle-switch');
+        const statusDesc = document.getElementById('pin-status');
+        const setupOption = document.getElementById('pin-setup-option');
+        
+        if (!toggleSwitch || !statusDesc) return;
+
+        // Temporarily remove the onchange handler to prevent event firing
+        const originalOnChange = toggleSwitch.getAttribute('onchange');
+        toggleSwitch.removeAttribute('onchange');
+
+        // Read directly from localStorage - use same logic as init()
+        const pinEnabled = localStorage.getItem('pinEnabled');
+        const pinHash = localStorage.getItem('pinHash');
+        const isPinEnabled = pinEnabled === 'true' && pinHash;
+
+        if (isPinEnabled) {
+            toggleSwitch.checked = true;
+            statusDesc.textContent = 'PIN protection is enabled';
+            if (setupOption) setupOption.style.display = 'flex';
+        } else {
+            toggleSwitch.checked = false;
+            statusDesc.textContent = 'Protect your app with a PIN code';
+            if (setupOption) setupOption.style.display = 'none';
+            // If PIN is disabled, ensure overlay is hidden
+            const pinOverlay = document.getElementById('pin-entry-overlay');
+            if (pinOverlay) {
+                pinOverlay.style.display = 'none';
+            }
+            // Ensure state is explicitly set to 'false' if not already set
+            if (pinEnabled !== 'false') {
+                localStorage.setItem('pinEnabled', 'false');
+            }
+        }
+
+        // Restore the onchange handler
+        if (originalOnChange) {
+            toggleSwitch.setAttribute('onchange', originalOnChange);
         }
     }
 
