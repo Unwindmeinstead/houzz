@@ -3012,28 +3012,77 @@ class HomeManagerApp {
                         <div class="recent-updates-list ${isCollapsed ? '' : 'expanded'}" id="recent-updates-list">
                             ${recentActivity.length > 0 ? recentActivity.map((activity, index) => {
                             const timeAgo = this.getTimeAgo(activity.timestamp);
+                            const timestamp = activity.timestamp;
+                            const dateStr = timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            const timeStr = timestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                            
                             let title = '';
                             let subtitle = '';
+                            let description = '';
                             
                             if (activity.category === 'todos') {
                                 title = activity.item.title || 'Task';
-                                subtitle = activity.item.date || activity.item.dueDate ? new Date(activity.item.date || activity.item.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                                const dueDate = activity.item.date || activity.item.dueDate;
+                                subtitle = dueDate ? `Due: ${new Date(dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'No due date';
+                                description = activity.type === 'added' ? 'Task created' : 'Task updated';
                             } else if (activity.category === 'cars') {
                                 title = `${activity.item.make || ''} ${activity.item.model || ''}`.trim() || 'Car';
-                                subtitle = activity.item.year || '';
+                                subtitle = activity.item.year ? `${activity.item.year}` : '';
+                                description = activity.type === 'added' ? 'Vehicle added' : 'Vehicle updated';
+                                if (activity.item.mileage) {
+                                    subtitle += subtitle ? ` • ${activity.item.mileage.toLocaleString()} mi` : `${activity.item.mileage.toLocaleString()} mi`;
+                                }
                             } else if (activity.category === 'bills') {
                                 title = activity.item.name || 'Bill';
-                                subtitle = activity.item.amount ? `$${parseFloat(activity.item.amount).toFixed(2)}` : '';
-                            } else if (activity.category === 'finances') {
-                                title = activity.item.category || activity.item.description || 'Transaction';
                                 const amount = parseFloat(activity.item.amount || 0);
-                                subtitle = `${activity.item.type === 'income' ? '+' : '-'}$${Math.abs(amount).toFixed(2)}`;
+                                subtitle = `$${amount.toFixed(2)}`;
+                                if (activity.item.dueDate) {
+                                    subtitle += ` • Due: ${new Date(activity.item.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                                }
+                                description = activity.type === 'added' ? 'Bill added' : 'Bill updated';
+                                if (activity.item.paid) {
+                                    description += ' • Paid';
+                                }
+                            } else if (activity.category === 'finances') {
+                                const categoryMap = {
+                                    'cash': 'Cash',
+                                    'stocks': 'Stocks',
+                                    '401k': '401k',
+                                    'savings': 'Savings'
+                                };
+                                const financeCategory = activity.item.financeCategory || activity.item.category || '';
+                                title = activity.item.description || categoryMap[financeCategory] || 'Transaction';
+                                const amount = parseFloat(activity.item.amount || 0);
+                                subtitle = `${activity.item.type === 'income' ? 'Income' : 'Expense'}: ${activity.item.type === 'income' ? '+' : '-'}$${Math.abs(amount).toFixed(2)}`;
+                                if (financeCategory) {
+                                    subtitle += ` • ${categoryMap[financeCategory]}`;
+                                }
+                                description = activity.type === 'added' ? 'Transaction added' : 'Transaction updated';
                             } else if (activity.category === 'insurances') {
                                 title = activity.item.provider || 'Insurance';
                                 subtitle = activity.item.type || '';
+                                if (activity.item.insuredItem) {
+                                    subtitle += subtitle ? ` • ${activity.item.insuredItem}` : activity.item.insuredItem;
+                                }
+                                description = activity.type === 'added' ? 'Insurance policy added' : 'Insurance policy updated';
                             } else if (activity.category === 'savings') {
                                 title = activity.item.name || 'Savings Goal';
-                                subtitle = activity.item.targetAmount ? `$${parseFloat(activity.item.targetAmount).toFixed(2)}` : '';
+                                subtitle = activity.item.targetAmount ? `Target: $${parseFloat(activity.item.targetAmount).toFixed(2)}` : '';
+                                if (activity.item.currentAmount) {
+                                    subtitle += subtitle ? ` • Current: $${parseFloat(activity.item.currentAmount).toFixed(2)}` : `Current: $${parseFloat(activity.item.currentAmount).toFixed(2)}`;
+                                }
+                                description = activity.type === 'added' ? 'Savings goal added' : 'Savings goal updated';
+                            } else if (activity.category === 'subscriptions') {
+                                title = activity.item.name || 'Subscription';
+                                subtitle = activity.item.amount ? `$${parseFloat(activity.item.amount).toFixed(2)}/${activity.item.frequency || 'month'}` : '';
+                                if (activity.item.billingDate) {
+                                    subtitle += ` • Next: ${new Date(activity.item.billingDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                                }
+                                description = activity.type === 'added' ? 'Subscription added' : 'Subscription updated';
+                            } else if (activity.category === 'checking') {
+                                title = 'Checking Account';
+                                subtitle = activity.item.balance ? `Balance: $${parseFloat(activity.item.balance).toFixed(2)}` : '';
+                                description = activity.type === 'added' ? 'Checking balance updated' : 'Checking balance changed';
                             }
                             
                             return `
@@ -3054,12 +3103,18 @@ class HomeManagerApp {
                                     </div>
                                     <div class="recent-update-content">
                                         <div class="recent-update-title">${title}</div>
+                                        <div class="recent-update-description">${description}</div>
                                         <div class="recent-update-meta">
                                             <span class="recent-update-category">${activity.categoryName}</span>
                                             ${subtitle ? `<span class="recent-update-subtitle">• ${subtitle}</span>` : ''}
                                         </div>
+                                        <div class="recent-update-datetime">
+                                            <span class="recent-update-date">${dateStr}</span>
+                                            <span class="recent-update-time-separator">•</span>
+                                            <span class="recent-update-time">${timeStr}</span>
+                                        </div>
                                     </div>
-                                    <div class="recent-update-time">${timeAgo}</div>
+                                    <div class="recent-update-time-ago">${timeAgo}</div>
                                 </div>
                             `;
                             }).join('') : `
