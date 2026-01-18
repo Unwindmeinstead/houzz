@@ -446,10 +446,6 @@ class HomeManagerApp {
             this.openAddModal();
         });
 
-        // Notifications button
-        document.getElementById('notifications-btn')?.addEventListener('click', () => {
-            this.openNotifications();
-        });
 
         // Settings button
         document.querySelector('.settings-btn')?.addEventListener('click', () => {
@@ -2538,24 +2534,19 @@ class HomeManagerApp {
     }
 
     updateNotificationBadge() {
-        const headerBadge = document.getElementById('notification-badge');
         const cardBadge = document.getElementById('card-notification-badge');
 
         const actionItems = this.getActionItems();
         const count = actionItems.length;
 
-        const updateBadge = (badge) => {
-            if (!badge) return;
-            if (count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        };
+        if (!cardBadge) return;
 
-        updateBadge(headerBadge);
-        updateBadge(cardBadge);
+        if (count > 0) {
+            cardBadge.textContent = count > 99 ? '99+' : count;
+            cardBadge.style.display = 'flex';
+        } else {
+            cardBadge.style.display = 'none';
+        }
     }
 
     openNotifications() {
