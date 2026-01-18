@@ -1694,16 +1694,86 @@ class HomeManagerApp {
 
     clearActionItems() {
         const actionItems = this.getActionItems();
-        
+
         // Mark all action items as done
         actionItems.forEach(item => {
             this.markActionItemDone(item.type, item.id);
         });
-        
+
         // Refresh the home view
         if (this.currentView === 'home') {
             this.renderHome();
         }
+    }
+
+    confirmDeleteAllData() {
+        // Create confirmation dialog
+        const dialog = document.createElement('div');
+        dialog.className = 'delete-confirm-overlay';
+        dialog.innerHTML = `
+                <div class="delete-confirm-dialog">
+                <div class="delete-confirm-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <h3 class="delete-confirm-title">Delete All Data?</h3>
+                <div class="delete-confirm-message">
+                    <p>This will permanently delete ALL your data including:</p>
+                    <ul style="text-align: left; margin: 12px 0;">
+                        <li>• Tasks and to-do items</li>
+                        <li>• Car information</li>
+                        <li>• Bills and payments</li>
+                        <li>• Financial transactions</li>
+                        <li>• Insurance policies</li>
+                        <li>• Subscriptions</li>
+                        <li>• Checking accounts</li>
+                        <li>• Savings goals</li>
+                    </ul>
+                    <p><strong>This action cannot be undone!</strong></p>
+                </div>
+                <div class="delete-confirm-actions">
+                    <button class="delete-confirm-btn cancel-btn" onclick="this.closest('.delete-confirm-overlay').remove(); HapticFeedback.light();">
+                        Cancel
+                    </button>
+                    <button class="delete-confirm-btn delete-btn" onclick="app.deleteAllData(); this.closest('.delete-confirm-overlay').remove(); HapticFeedback.warning();">
+                        Delete Everything
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+        HapticFeedback.warning();
+    }
+
+    deleteAllData() {
+        // Clear all data from storage
+        const data = {
+            todos: [],
+            cars: [],
+            bills: [],
+            insurances: [],
+            finances: [],
+            savings: [],
+            checking: [],
+            subscriptions: []
+        };
+
+        storage.setData(data);
+
+        // Close settings overlay
+        document.getElementById('settings-overlay').classList.remove('active');
+
+        // Switch back to home and refresh all views
+        this.switchView('home');
+        this.updateCategoryCounts();
+        this.updateNotificationBadge();
+
+        // Show success message
+        this.showToast('All data has been deleted successfully', 'success');
     }
 
     toggleActionItemsSection() {

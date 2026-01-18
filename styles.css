@@ -2862,6 +2862,7 @@ body {
     justify-content: space-between;
     padding: 16px;
     background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 8px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
 }
@@ -2911,6 +2912,17 @@ body {
 .settings-action-btn svg {
     width: 20px;
     height: 20px;
+}
+
+.settings-action-btn.danger {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.settings-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
 }
 
 /* Toggle Switch */
