@@ -3206,6 +3206,7 @@ class HomeManagerApp {
         setTimeout(() => {
             this.loadRecentUpdatesState();
             this.loadActionItemsState();
+            this.loadQuickAccessState();
         }, 100);
         
         // Update notification badge
