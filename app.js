@@ -4827,7 +4827,6 @@ class HomeManagerApp {
         return outputArray;
     }
 }
-    hashPin(pin) {
         // Simple hash function (in production, use a proper hashing library)
         let hash = 0;
         for (let i = 0; i < pin.length; i++) {
