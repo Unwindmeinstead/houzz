@@ -1,4 +1,4 @@
-const CACHE_NAME = 'houzz-app-v1';
+const CACHE_NAME = 'houzz-app-v2';
 const urlsToCache = [
   '/',
   '/index.html',
