@@ -1710,6 +1710,7 @@ class HomeManagerApp {
         const indicator = document.getElementById('action-items-indicator');
         if (!container || !indicator) return;
         
+        HapticFeedback.light();
         const isCollapsed = container.classList.contains('collapsed');
         
         if (isCollapsed) {
@@ -1720,6 +1721,37 @@ class HomeManagerApp {
             container.classList.add('collapsed');
             indicator.style.transform = 'rotate(-90deg)';
             localStorage.setItem('actionItemsCollapsed', 'true');
+        }
+    }
+
+    toggleQuickAccessSection() {
+        const container = document.getElementById('quick-access-container');
+        const indicator = document.getElementById('quick-access-indicator');
+        if (!container || !indicator) return;
+        
+        HapticFeedback.light();
+        const isCollapsed = container.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            container.classList.remove('collapsed');
+            indicator.style.transform = 'rotate(0deg)';
+            localStorage.setItem('quickAccessCollapsed', 'false');
+        } else {
+            container.classList.add('collapsed');
+            indicator.style.transform = 'rotate(-90deg)';
+            localStorage.setItem('quickAccessCollapsed', 'true');
+        }
+    }
+
+    loadQuickAccessState() {
+        const container = document.getElementById('quick-access-container');
+        const indicator = document.getElementById('quick-access-indicator');
+        if (!container || !indicator) return;
+        
+        const isCollapsed = localStorage.getItem('quickAccessCollapsed') === 'true';
+        if (isCollapsed) {
+            container.classList.add('collapsed');
+            indicator.style.transform = 'rotate(-90deg)';
         }
     }
 
