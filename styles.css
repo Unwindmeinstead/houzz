@@ -354,7 +354,7 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 40px 20px;
+    padding: 50px 20px;
     height: 100%;
 }
 
@@ -363,17 +363,21 @@ body {
 }
 
 .metric-value-large {
-    font-size: 36px;
-    font-weight: 800;
+    font-size: 56px;
+    font-weight: 900;
     color: var(--text-white);
-    line-height: 1.1;
-    margin-bottom: 8px;
+    line-height: 1.0;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.5px;
 }
 
 .metric-label-large {
     font-size: 16px;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 @media (max-width: 480px) {
@@ -391,14 +395,8 @@ body {
         justify-content: center;
     }
 
-    .metric-icon-large {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-    }
-
     .metric-value-large {
-        font-size: 28px;
+        font-size: 42px;
     }
 
     .metric-label-large {
