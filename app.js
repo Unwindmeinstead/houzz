@@ -74,10 +74,23 @@ class HomeManagerApp {
     }
 
     init() {
-        // Check if PIN protection is enabled AND PIN hash exists
-        if (this.isPinEnabled() && this.getPinHash()) {
+        // Only check PIN if protection is explicitly enabled
+        const pinEnabled = localStorage.getItem('pinEnabled');
+        const pinHash = localStorage.getItem('pinHash');
+        
+        // Show PIN entry only if PIN is enabled AND hash exists
+        if (pinEnabled === 'true' && pinHash) {
             this.showPinEntry();
             return; // Don't initialize app until PIN is entered
+        }
+        
+        // If PIN is disabled, ensure it's properly cleared
+        if (pinEnabled === 'false' || !pinEnabled) {
+            // Make sure PIN entry overlay is hidden
+            const pinOverlay = document.getElementById('pin-entry-overlay');
+            if (pinOverlay) {
+                pinOverlay.style.display = 'none';
+            }
         }
         
         this.setupEventListeners();
