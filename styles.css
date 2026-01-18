@@ -1566,12 +1566,13 @@ body {
 
 /* Individual item delete confirmation buttons */
 .delete-confirm-actions .cancel-btn {
-    flex: 0.7 !important; /* Smaller than delete button */
+    flex: 0.7 !important; /* Same size as delete button */
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: var(--text-white) !important;
-    padding: 8px 12px !important; /* Smaller padding */
-    font-size: 13px !important; /* Smaller font */
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
 }
 
 .delete-confirm-actions .cancel-btn:hover {
@@ -1579,11 +1580,12 @@ body {
 }
 
 .delete-confirm-actions .delete-btn {
-    flex: 1.3 !important; /* Larger than cancel button */
+    flex: 0.7 !important; /* Same size as cancel button */
     background: #dc2626 !important;
     color: white !important;
-    font-size: 14px !important;
-    padding: 10px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    padding: 8px 12px !important;
 }
 
 .delete-confirm-actions .delete-btn:hover {
