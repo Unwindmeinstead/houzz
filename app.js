@@ -4959,25 +4959,47 @@ class HomeManagerApp {
                 this.updatePinUI();
             }
         } else {
-            // Disable PIN protection - require PIN to disable
-            this.showPinEntry();
-            const originalVerify = this.verifyPin.bind(this);
-            const originalKeypadInput = this.pinKeypadInput.bind(this);
-            
-            this.pinKeypadInput = (digit) => {
-                originalKeypadInput(digit);
-                if (this.pinEntry.length === 4) {
-                    setTimeout(() => {
-                        if (originalVerify(this.pinEntry)) {
-                            localStorage.setItem('pinEnabled', 'false');
-                            this.hidePinEntry();
-                            toggleSwitch.checked = false;
-                            this.updatePinUI();
-                            this.pinKeypadInput = originalKeypadInput; // Restore original
-                        }
-                    }, 100);
-                }
-            };
+            // Disable PIN protection
+            if (this.getPinHash()) {
+                // PIN exists, require verification to disable
+                this.showPinEntry();
+                const originalVerify = this.verifyPin.bind(this);
+                const originalKeypadInput = this.pinKeypadInput.bind(this);
+                
+                this.pinKeypadInput = (digit) => {
+                    originalKeypadInput(digit);
+                    if (this.pinEntry.length === 4) {
+                        requestAnimationFrame(() => {
+                            if (originalVerify(this.pinEntry)) {
+                                localStorage.setItem('pinEnabled', 'false');
+                                this.hidePinEntry();
+                                toggleSwitch.checked = false;
+                                this.updatePinUI();
+                                this.pinKeypadInput = originalKeypadInput; // Restore original
+                            } else {
+                                // Wrong PIN, clear and show error
+                                HapticFeedback.error();
+                                this.pinEntry = '';
+                                this.updatePinDots('entry');
+                                const errorEl = document.getElementById('pin-entry-error');
+                                if (errorEl) {
+                                    errorEl.textContent = 'Incorrect PIN. Cannot disable protection.';
+                                    errorEl.style.display = 'block';
+                                    setTimeout(() => {
+                                        errorEl.style.display = 'none';
+                                    }, 3000);
+                                }
+                                toggleSwitch.checked = true; // Revert toggle
+                                this.updatePinUI();
+                            }
+                        });
+                    }
+                };
+            } else {
+                // No PIN set, just disable directly
+                localStorage.setItem('pinEnabled', 'false');
+                this.updatePinUI();
+            }
         }
     }
 
