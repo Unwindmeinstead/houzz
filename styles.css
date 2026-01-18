@@ -293,14 +293,14 @@ body {
     gap: 12px;
 }
 
-.profile-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    flex-shrink: 0;
-}
+    .profile-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        flex-shrink: 0;
+    }
 
 .profile-avatar img {
     width: 100%;
@@ -323,12 +323,12 @@ body {
     flex-direction: column;
 }
 
-.profile-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-white);
-    line-height: 1.2;
-}
+    .profile-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-white);
+        line-height: 1.2;
+    }
 
 .metrics-nav {
     display: flex;
@@ -419,9 +419,10 @@ body {
     }
 
     .metrics-header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
     }
 
     .metric-value-large {
