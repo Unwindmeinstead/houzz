@@ -1480,6 +1480,7 @@ body {
 }
 
 .delete-confirm-dialog {
+    position: relative;
     background: var(--bg-black);
     border: 1px solid var(--border-gray);
     border-radius: 20px;
@@ -1564,32 +1565,63 @@ body {
     transform: scale(0.98);
 }
 
-/* Individual item delete confirmation buttons */
-.delete-confirm-actions .cancel-btn {
-    flex: 0.7 !important; /* Same size as delete button */
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: var(--text-white) !important;
-    padding: 3px 12px !important; /* 10px shorter height */
-    font-size: 13px !important;
-    font-weight: 600 !important;
+/* Delete confirmation close button */
+.delete-confirm-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-white);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 10;
 }
 
-.delete-confirm-actions .cancel-btn:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+.delete-confirm-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
+.delete-confirm-close-btn:active {
+    transform: scale(0.95);
+}
+
+.delete-confirm-close-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Delete confirmation dialog buttons */
 .delete-confirm-actions .delete-btn {
-    flex: 0.7 !important; /* Same size as cancel button */
+    width: 100% !important;
+    padding: 12px 16px !important;
     background: #dc2626 !important;
+    border: 1px solid #dc2626 !important;
+    border-radius: 8px !important;
     color: white !important;
-    font-size: 13px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
-    padding: 8px 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    -webkit-tap-highlight-color: transparent !important;
+    box-sizing: border-box !important;
 }
 
 .delete-confirm-actions .delete-btn:hover {
     background: #b91c1c !important;
+    border-color: #b91c1c !important;
+}
+
+.delete-confirm-actions .delete-btn:active {
+    transform: scale(0.98) !important;
 }
 
 /* Insights */
@@ -3678,6 +3710,274 @@ button, .nav-item, .task-item {
         width: 100%;
         max-width: 100%;
     }
+}
+
+/* PIN Security Styles */
+
+/* PIN Setup Modal */
+.pin-setup-overlay,
+.pin-entry-overlay,
+.pin-verify-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.pin-setup-modal,
+.pin-entry-modal,
+.pin-verify-modal {
+    background: var(--bg-black);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 32px 24px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pin-setup-header,
+.pin-entry-header,
+.pin-verify-header {
+    margin-bottom: 32px;
+}
+
+.pin-setup-header h3,
+.pin-entry-header h3,
+.pin-verify-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+}
+
+.pin-setup-header p,
+.pin-entry-header p,
+.pin-verify-header p {
+    font-size: 15px;
+    color: var(--text-gray);
+    line-height: 1.4;
+}
+
+/* PIN Input */
+.pin-input-container {
+    margin-bottom: 32px;
+}
+
+.pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.pin-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.pin-dot.active {
+    background: var(--text-white);
+    border-color: var(--text-white);
+    transform: scale(1.1);
+}
+
+/* PIN Keypad */
+.pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pin-key {
+    width: 80px;
+    height: 80px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    color: var(--text-white);
+    font-size: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pin-key:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+.pin-key:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pin-key-empty {
+    background: transparent !important;
+    border: none !important;
+    cursor: default !important;
+}
+
+.pin-key-empty:hover,
+.pin-key-empty:active {
+    transform: none !important;
+    background: transparent !important;
+}
+
+.pin-key-backspace {
+    color: #ef4444;
+}
+
+.pin-key-backspace:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.pin-key-backspace svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* PIN Actions */
+.pin-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.pin-cancel-btn,
+.pin-confirm-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    border: none;
+}
+
+.pin-cancel-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+}
+
+.pin-cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pin-confirm-btn {
+    background: #4ade80;
+    color: white;
+    border: 1px solid #4ade80;
+}
+
+.pin-confirm-btn:hover:not(:disabled) {
+    background: #22c55e;
+    border-color: #22c55e;
+    transform: scale(1.02);
+}
+
+.pin-confirm-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.pin-confirm-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pin-forgot-btn {
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pin-forgot-btn:hover {
+    color: #1d4ed8;
+}
+
+/* PIN Status in Settings */
+#pin-status-text {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+/* Responsive PIN UI */
+@media (max-width: 480px) {
+    .pin-setup-modal,
+    .pin-entry-modal,
+    .pin-verify-modal {
+        margin: 16px;
+        padding: 24px 20px;
+    }
+
+    .pin-keypad {
+        gap: 8px;
+        max-width: 240px;
+    }
+
+    .pin-key {
+        width: 70px;
+        height: 70px;
+        font-size: 20px;
+    }
+
+    .pin-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pin-cancel-btn,
+    .pin-confirm-btn {
+        padding: 16px 20px;
+    }
+}
+
+/* PIN Animations */
+@keyframes pinShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.pin-shake {
+    animation: pinShake 0.5s ease-in-out;
 }
 
 /* PWA specific styles */
