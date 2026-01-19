@@ -200,14 +200,19 @@ class HomeManagerApp {
 
         keys.forEach(key => {
             if (key.dataset.value) {
-                key.addEventListener('touchstart', () => {
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
                     HapticFeedback.light();
                     key.classList.add('pressed');
-                });
-                key.addEventListener('touchend', () => {
+                }, { passive: false });
+
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
                     key.classList.remove('pressed');
-                });
-                key.addEventListener('click', () => {
+                }, { passive: false });
+
+                key.addEventListener('click', (e) => {
+                    e.preventDefault();
                     const value = key.dataset.value;
                     const currentPin = step === 'create' ? pin : confirmPin;
 
@@ -223,14 +228,19 @@ class HomeManagerApp {
             }
         });
 
-        backspace.addEventListener('touchstart', () => {
+        backspace.addEventListener('touchstart', (e) => {
+            e.preventDefault();
             HapticFeedback.light();
             backspace.classList.add('pressed');
-        });
-        backspace.addEventListener('touchend', () => {
+        }, { passive: false });
+
+        backspace.addEventListener('touchend', (e) => {
+            e.preventDefault();
             backspace.classList.remove('pressed');
-        });
-        backspace.addEventListener('click', () => {
+        }, { passive: false });
+
+        backspace.addEventListener('click', (e) => {
+            e.preventDefault();
             if (step === 'create') {
                 pin = pin.slice(0, -1);
             } else {
@@ -258,7 +268,14 @@ class HomeManagerApp {
 
                     HapticFeedback.success();
                     this.showToast('PIN set successfully', 'success');
-                    modal.remove();
+
+                    // Close modal immediately
+                    modal.style.display = 'none';
+                    setTimeout(() => {
+                        if (modal.parentNode) {
+                            modal.parentNode.removeChild(modal);
+                        }
+                    }, 100);
                 } else {
                     HapticFeedback.error();
                     this.showToast('PINs do not match. Try again.', 'error');
@@ -338,14 +355,19 @@ class HomeManagerApp {
 
         keys.forEach(key => {
             if (key.dataset.value) {
-                key.addEventListener('touchstart', () => {
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
                     HapticFeedback.light();
                     key.classList.add('pressed');
-                });
-                key.addEventListener('touchend', () => {
+                }, { passive: false });
+
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
                     key.classList.remove('pressed');
-                });
-                key.addEventListener('click', () => {
+                }, { passive: false });
+
+                key.addEventListener('click', (e) => {
+                    e.preventDefault();
                     const value = key.dataset.value;
 
                     if (enteredPin.length < 4) {
@@ -356,7 +378,13 @@ class HomeManagerApp {
                             setTimeout(() => {
                                 if (enteredPin === storedPin) {
                                     this.unlockApp();
-                                    modal.remove();
+                                    // Close modal immediately
+                                    modal.style.display = 'none';
+                                    setTimeout(() => {
+                                        if (modal.parentNode) {
+                                            modal.parentNode.removeChild(modal);
+                                        }
+                                    }, 100);
                                 } else {
                                     attempts++;
                                     HapticFeedback.error();
@@ -372,21 +400,26 @@ class HomeManagerApp {
                                         updateDisplay();
                                     }
                                 }
-                            }, 200);
+                            }, 150); // Reduced delay for faster response
                         }
                     }
                 });
             }
         });
 
-        backspace.addEventListener('touchstart', () => {
+        backspace.addEventListener('touchstart', (e) => {
+            e.preventDefault();
             HapticFeedback.light();
             backspace.classList.add('pressed');
-        });
-        backspace.addEventListener('touchend', () => {
+        }, { passive: false });
+
+        backspace.addEventListener('touchend', (e) => {
+            e.preventDefault();
             backspace.classList.remove('pressed');
-        });
-        backspace.addEventListener('click', () => {
+        }, { passive: false });
+
+        backspace.addEventListener('click', (e) => {
+            e.preventDefault();
             enteredPin = enteredPin.slice(0, -1);
             updateDisplay();
         });
@@ -482,14 +515,19 @@ class HomeManagerApp {
 
         keys.forEach(key => {
             if (key.dataset.value) {
-                key.addEventListener('touchstart', () => {
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
                     HapticFeedback.light();
                     key.classList.add('pressed');
-                });
-                key.addEventListener('touchend', () => {
+                }, { passive: false });
+
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
                     key.classList.remove('pressed');
-                });
-                key.addEventListener('click', () => {
+                }, { passive: false });
+
+                key.addEventListener('click', (e) => {
+                    e.preventDefault();
                     const value = key.dataset.value;
 
                     if (enteredPin.length < 4) {
@@ -500,31 +538,42 @@ class HomeManagerApp {
                             setTimeout(() => {
                                 const storedPin = localStorage.getItem('app_pin');
                                 if (enteredPin === storedPin) {
-                                    modal.remove();
-                                    if (reason === 'change') {
-                                        this.showPinSetup();
-                                    }
+                                    // Close modal immediately
+                                    modal.style.display = 'none';
+                                    setTimeout(() => {
+                                        if (modal.parentNode) {
+                                            modal.parentNode.removeChild(modal);
+                                        }
+                                        if (reason === 'change') {
+                                            this.showPinSetup();
+                                        }
+                                    }, 100);
                                 } else {
                                     HapticFeedback.error();
                                     this.showToast('Incorrect PIN', 'error');
                                     enteredPin = '';
                                     updateDisplay();
                                 }
-                            }, 200);
+                            }, 150); // Reduced delay for faster response
                         }
                     }
                 });
             }
         });
 
-        backspace.addEventListener('touchstart', () => {
+        backspace.addEventListener('touchstart', (e) => {
+            e.preventDefault();
             HapticFeedback.light();
             backspace.classList.add('pressed');
-        });
-        backspace.addEventListener('touchend', () => {
+        }, { passive: false });
+
+        backspace.addEventListener('touchend', (e) => {
+            e.preventDefault();
             backspace.classList.remove('pressed');
-        });
-        backspace.addEventListener('click', () => {
+        }, { passive: false });
+
+        backspace.addEventListener('click', (e) => {
+            e.preventDefault();
             enteredPin = enteredPin.slice(0, -1);
             updateDisplay();
         });
