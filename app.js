@@ -72,6 +72,11 @@ class HomeManagerApp {
     }
 
     init() {
+        // Check PIN lock first
+        if (this.checkPinLock()) {
+            return; // App is locked, don't initialize further
+        }
+
         this.setupEventListeners();
         this.renderHome();
         this.updateCategoryCounts();
@@ -86,11 +91,652 @@ class HomeManagerApp {
         overlay.classList.add('active');
         // Update notification UI when opening settings
         this.checkNotificationPermission();
+        // Update PIN lock UI
+        this.updatePinSettings();
     }
 
     closeSettings() {
         const overlay = document.getElementById('settings-overlay');
         overlay.classList.remove('active');
+    }
+
+    // PIN Security System
+    togglePinLock() {
+        const toggle = document.getElementById('pin-lock-toggle');
+        const isEnabled = toggle.checked;
+
+        if (isEnabled) {
+            const pin = localStorage.getItem('app_pin');
+            if (!pin) {
+                this.showPinSetup();
+                return;
+            }
+            localStorage.setItem('pin_lock_enabled', 'true');
+            this.showPinOptions(true);
+            this.updatePinStatus();
+            HapticFeedback.success();
+            this.showToast('PIN lock enabled', 'success');
+        } else {
+            localStorage.setItem('pin_lock_enabled', 'false');
+            this.showPinOptions(false);
+            this.updatePinStatus();
+            HapticFeedback.success();
+            this.showToast('PIN lock disabled', 'success');
+        }
+    }
+
+    showPinSetup() {
+        const modal = this.createPinModal('setup');
+        modal.innerHTML = `
+            <div class="pin-modal">
+                <div class="pin-header">
+                    <h3>Set PIN</h3>
+                    <p>Create a 4-digit PIN to secure your app</p>
+                </div>
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-value="1">1</button>
+                    <button class="pin-key" data-value="2">2</button>
+                    <button class="pin-key" data-value="3">3</button>
+                    <button class="pin-key" data-value="4">4</button>
+                    <button class="pin-key" data-value="5">5</button>
+                    <button class="pin-key" data-value="6">6</button>
+                    <button class="pin-key" data-value="7">7</button>
+                    <button class="pin-key" data-value="8">8</button>
+                    <button class="pin-key" data-value="9">9</button>
+                    <button class="pin-key pin-spacer"></button>
+                    <button class="pin-key" data-value="0">0</button>
+                    <button class="pin-key pin-backspace" id="pin-backspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-actions">
+                    <button class="pin-btn-secondary" onclick="this.closest('.pin-overlay').remove()">Cancel</button>
+                    <button class="pin-btn-primary" id="pin-confirm-btn" disabled>Set PIN</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.initPinSetup(modal);
+    }
+
+    createPinModal(type) {
+        const overlay = document.createElement('div');
+        overlay.className = 'pin-overlay';
+        return overlay;
+    }
+
+    initPinSetup(modal) {
+        let pin = '';
+        let confirmPin = '';
+        let step = 'create';
+
+        const dots = modal.querySelectorAll('.pin-dot');
+        const keys = modal.querySelectorAll('.pin-key:not(.pin-spacer)');
+        const backspace = modal.querySelector('#pin-backspace');
+        const confirmBtn = modal.querySelector('#pin-confirm-btn');
+
+        const updateDisplay = () => {
+            const currentPin = step === 'create' ? pin : confirmPin;
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < currentPin.length);
+            });
+            confirmBtn.disabled = currentPin.length !== 4;
+            confirmBtn.textContent = step === 'create' ? 'Confirm PIN' : 'Set PIN';
+        };
+
+        keys.forEach(key => {
+            if (key.dataset.value) {
+                key.addEventListener('touchstart', () => {
+                    HapticFeedback.light();
+                    key.classList.add('pressed');
+                });
+                key.addEventListener('touchend', () => {
+                    key.classList.remove('pressed');
+                });
+                key.addEventListener('click', () => {
+                    const value = key.dataset.value;
+                    const currentPin = step === 'create' ? pin : confirmPin;
+
+                    if (currentPin.length < 4) {
+                        if (step === 'create') {
+                            pin += value;
+                        } else {
+                            confirmPin += value;
+                        }
+                        updateDisplay();
+                    }
+                });
+            }
+        });
+
+        backspace.addEventListener('touchstart', () => {
+            HapticFeedback.light();
+            backspace.classList.add('pressed');
+        });
+        backspace.addEventListener('touchend', () => {
+            backspace.classList.remove('pressed');
+        });
+        backspace.addEventListener('click', () => {
+            if (step === 'create') {
+                pin = pin.slice(0, -1);
+            } else {
+                confirmPin = confirmPin.slice(0, -1);
+            }
+            updateDisplay();
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            HapticFeedback.medium();
+            if (step === 'create') {
+                step = 'confirm';
+                modal.querySelector('.pin-header h3').textContent = 'Confirm PIN';
+                modal.querySelector('.pin-header p').textContent = 'Enter your PIN again';
+                updateDisplay();
+            } else {
+                if (pin === confirmPin) {
+                    localStorage.setItem('app_pin', pin);
+                    localStorage.setItem('pin_lock_enabled', 'true');
+
+                    const toggle = document.getElementById('pin-lock-toggle');
+                    if (toggle) toggle.checked = true;
+                    this.showPinOptions(true);
+                    this.updatePinStatus();
+
+                    HapticFeedback.success();
+                    this.showToast('PIN set successfully', 'success');
+                    modal.remove();
+                } else {
+                    HapticFeedback.error();
+                    this.showToast('PINs do not match. Try again.', 'error');
+                    pin = '';
+                    confirmPin = '';
+                    step = 'create';
+                    modal.querySelector('.pin-header h3').textContent = 'Set PIN';
+                    modal.querySelector('.pin-header p').textContent = 'Create a 4-digit PIN to secure your app';
+                    updateDisplay();
+                }
+            }
+        });
+    }
+
+    showPinEntry() {
+        const modal = this.createPinModal('entry');
+        modal.innerHTML = `
+            <div class="pin-modal">
+                <div class="pin-header">
+                    <h3>Enter PIN</h3>
+                    <p>Enter your 4-digit PIN to unlock</p>
+                </div>
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-value="1">1</button>
+                    <button class="pin-key" data-value="2">2</button>
+                    <button class="pin-key" data-value="3">3</button>
+                    <button class="pin-key" data-value="4">4</button>
+                    <button class="pin-key" data-value="5">5</button>
+                    <button class="pin-key" data-value="6">6</button>
+                    <button class="pin-key" data-value="7">7</button>
+                    <button class="pin-key" data-value="8">8</button>
+                    <button class="pin-key" data-value="9">9</button>
+                    <button class="pin-key pin-spacer"></button>
+                    <button class="pin-key" data-value="0">0</button>
+                    <button class="pin-key pin-backspace" id="pin-entry-backspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-actions">
+                    <button class="pin-btn-secondary" onclick="app.forgotPin()">Forgot PIN?</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.initPinEntry(modal);
+    }
+
+    initPinEntry(modal) {
+        let enteredPin = '';
+        let attempts = 0;
+        const maxAttempts = 5;
+
+        const dots = modal.querySelectorAll('.pin-dot');
+        const keys = modal.querySelectorAll('.pin-key:not(.pin-spacer)');
+        const backspace = modal.querySelector('#pin-entry-backspace');
+        const storedPin = localStorage.getItem('app_pin');
+
+        const updateDisplay = () => {
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < enteredPin.length);
+            });
+        };
+
+        keys.forEach(key => {
+            if (key.dataset.value) {
+                key.addEventListener('touchstart', () => {
+                    HapticFeedback.light();
+                    key.classList.add('pressed');
+                });
+                key.addEventListener('touchend', () => {
+                    key.classList.remove('pressed');
+                });
+                key.addEventListener('click', () => {
+                    const value = key.dataset.value;
+
+                    if (enteredPin.length < 4) {
+                        enteredPin += value;
+                        updateDisplay();
+
+                        if (enteredPin.length === 4) {
+                            setTimeout(() => {
+                                if (enteredPin === storedPin) {
+                                    this.unlockApp();
+                                    modal.remove();
+                                } else {
+                                    attempts++;
+                                    HapticFeedback.error();
+
+                                    if (attempts >= maxAttempts) {
+                                        this.showToast('Too many failed attempts. Try again later.', 'error');
+                                        setTimeout(() => {
+                                            location.reload();
+                                        }, 30000);
+                                    } else {
+                                        this.showToast(`Incorrect PIN. ${maxAttempts - attempts} attempts remaining.`, 'error');
+                                        enteredPin = '';
+                                        updateDisplay();
+                                    }
+                                }
+                            }, 200);
+                        }
+                    }
+                });
+            }
+        });
+
+        backspace.addEventListener('touchstart', () => {
+            HapticFeedback.light();
+            backspace.classList.add('pressed');
+        });
+        backspace.addEventListener('touchend', () => {
+            backspace.classList.remove('pressed');
+        });
+        backspace.addEventListener('click', () => {
+            enteredPin = enteredPin.slice(0, -1);
+            updateDisplay();
+        });
+    }
+
+    unlockApp() {
+        localStorage.setItem('app_locked', 'false');
+        localStorage.setItem('last_unlock_time', Date.now().toString());
+        this.showToast('App unlocked', 'success');
+    }
+
+    lockApp() {
+        localStorage.setItem('app_locked', 'true');
+        this.showPinEntry();
+    }
+
+    forgotPin() {
+        if (confirm('This will disable PIN lock. Are you sure?')) {
+            localStorage.removeItem('app_pin');
+            localStorage.setItem('pin_lock_enabled', 'false');
+            const toggle = document.getElementById('pin-lock-toggle');
+            if (toggle) toggle.checked = false;
+            this.showPinOptions(false);
+            this.updatePinStatus();
+            this.showToast('PIN lock disabled', 'success');
+            document.querySelector('.pin-overlay').remove();
+        }
+    }
+
+    changePin() {
+        this.showPinVerification('change');
+    }
+
+    showPinVerification(reason) {
+        const modal = this.createPinModal('verify');
+        modal.innerHTML = `
+            <div class="pin-modal">
+                <div class="pin-header">
+                    <h3>Verify PIN</h3>
+                    <p>Enter your current PIN</p>
+                </div>
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-value="1">1</button>
+                    <button class="pin-key" data-value="2">2</button>
+                    <button class="pin-key" data-value="3">3</button>
+                    <button class="pin-key" data-value="4">4</button>
+                    <button class="pin-key" data-value="5">5</button>
+                    <button class="pin-key" data-value="6">6</button>
+                    <button class="pin-key" data-value="7">7</button>
+                    <button class="pin-key" data-value="8">8</button>
+                    <button class="pin-key" data-value="9">9</button>
+                    <button class="pin-key pin-spacer"></button>
+                    <button class="pin-key" data-value="0">0</button>
+                    <button class="pin-key pin-backspace" id="pin-verify-backspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-actions">
+                    <button class="pin-btn-secondary" onclick="this.closest('.pin-overlay').remove()">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.initPinVerification(modal, reason);
+    }
+
+    initPinVerification(modal, reason) {
+        let enteredPin = '';
+
+        const dots = modal.querySelectorAll('.pin-dot');
+        const keys = modal.querySelectorAll('.pin-key:not(.pin-spacer)');
+        const backspace = modal.querySelector('#pin-verify-backspace');
+
+        const updateDisplay = () => {
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < enteredPin.length);
+            });
+        };
+
+        keys.forEach(key => {
+            if (key.dataset.value) {
+                key.addEventListener('touchstart', () => {
+                    HapticFeedback.light();
+                    key.classList.add('pressed');
+                });
+                key.addEventListener('touchend', () => {
+                    key.classList.remove('pressed');
+                });
+                key.addEventListener('click', () => {
+                    const value = key.dataset.value;
+
+                    if (enteredPin.length < 4) {
+                        enteredPin += value;
+                        updateDisplay();
+
+                        if (enteredPin.length === 4) {
+                            setTimeout(() => {
+                                const storedPin = localStorage.getItem('app_pin');
+                                if (enteredPin === storedPin) {
+                                    modal.remove();
+                                    if (reason === 'change') {
+                                        this.showPinSetup();
+                                    }
+                                } else {
+                                    HapticFeedback.error();
+                                    this.showToast('Incorrect PIN', 'error');
+                                    enteredPin = '';
+                                    updateDisplay();
+                                }
+                            }, 200);
+                        }
+                    }
+                });
+            }
+        });
+
+        backspace.addEventListener('touchstart', () => {
+            HapticFeedback.light();
+            backspace.classList.add('pressed');
+        });
+        backspace.addEventListener('touchend', () => {
+            backspace.classList.remove('pressed');
+        });
+        backspace.addEventListener('click', () => {
+            enteredPin = enteredPin.slice(0, -1);
+            updateDisplay();
+        });
+    }
+
+    showPinOptions(show) {
+        const options = document.getElementById('pin-lock-options');
+        if (options) {
+            options.style.display = show ? 'flex' : 'none';
+        }
+    }
+
+    updatePinSettings() {
+        const toggle = document.getElementById('pin-lock-toggle');
+        const pin = localStorage.getItem('app_pin');
+        const enabled = localStorage.getItem('pin_lock_enabled') === 'true';
+
+        if (toggle) {
+            toggle.checked = enabled && pin;
+        }
+        this.showPinOptions(enabled && pin);
+        this.updatePinStatus();
+    }
+
+    updatePinStatus() {
+        const statusText = document.getElementById('pin-status-text');
+        const pin = localStorage.getItem('app_pin');
+        const enabled = localStorage.getItem('pin_lock_enabled') === 'true';
+
+        if (statusText) {
+            if (pin && enabled) {
+                statusText.textContent = 'PIN lock active';
+                statusText.style.color = '#4ade80';
+            } else if (pin) {
+                statusText.textContent = 'PIN set, lock disabled';
+                statusText.style.color = '#fbbf24';
+            } else {
+                statusText.textContent = 'PIN not set';
+                statusText.style.color = '#6b7280';
+            }
+        }
+    }
+
+    checkPinLock() {
+        const pinEnabled = localStorage.getItem('pin_lock_enabled') === 'true';
+        const pin = localStorage.getItem('app_pin');
+        const isLocked = localStorage.getItem('app_locked') === 'true';
+        const lastUnlockTime = localStorage.getItem('last_unlock_time');
+
+        if (pinEnabled && pin) {
+            if (lastUnlockTime) {
+                const timeSinceUnlock = Date.now() - parseInt(lastUnlockTime);
+                if (timeSinceUnlock > 300000) { // 5 minutes
+                    this.lockApp();
+                    return true;
+                }
+            }
+
+            if (isLocked) {
+                this.showPinEntry();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Backup & Restore Functionality
+    createBackup() {
+        try {
+            const backupData = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                data: {
+                    todos: storage.getTodos(),
+                    cars: storage.getCars(),
+                    finances: storage.getFinances(),
+                    bills: storage.getBills(),
+                    subscriptions: storage.getAll('subscriptions') || [],
+                    insurances: storage.getAll('insurances') || [],
+                    checking: storage.getAll('checking') || [],
+                    savings: storage.getAll('savings') || [],
+                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}'),
+                    settings: {
+                        notifications: localStorage.getItem('notifications_enabled'),
+                        pinLock: localStorage.getItem('pin_lock_enabled'),
+                        // Note: PIN itself is not included for security
+                    }
+                }
+            };
+
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `houzz-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            HapticFeedback.success();
+            this.showToast('Backup created successfully!', 'success');
+        } catch (error) {
+            console.error('Backup creation failed:', error);
+            HapticFeedback.error();
+            this.showToast('Backup creation failed', 'error');
+        }
+    }
+
+    restoreBackup(fileInput) {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        if (!confirm('This will replace all your current data. Are you sure you want to restore from this backup?')) {
+            fileInput.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const backupData = JSON.parse(e.target.result);
+
+                // Validate backup format
+                if (!backupData.version || !backupData.data) {
+                    throw new Error('Invalid backup file format');
+                }
+
+                // Clear existing data
+                this.clearAllData();
+
+                // Restore data
+                const data = backupData.data;
+
+                // Restore each category
+                if (data.todos) {
+                    data.todos.forEach(item => storage.add('todos', item));
+                }
+                if (data.cars) {
+                    data.cars.forEach(item => storage.add('cars', item));
+                }
+                if (data.finances) {
+                    data.finances.forEach(item => storage.add('finances', item));
+                }
+                if (data.bills) {
+                    data.bills.forEach(item => storage.add('bills', item));
+                }
+                if (data.subscriptions) {
+                    data.subscriptions.forEach(item => storage.add('subscriptions', item));
+                }
+                if (data.insurances) {
+                    data.insurances.forEach(item => storage.add('insurances', item));
+                }
+                if (data.checking) {
+                    data.checking.forEach(item => storage.add('checking', item));
+                }
+                if (data.savings) {
+                    data.savings.forEach(item => storage.add('savings', item));
+                }
+
+                // Restore user profile
+                if (data.userProfile) {
+                    localStorage.setItem('userProfile', JSON.stringify(data.userProfile));
+                }
+
+                // Restore settings (but not PIN)
+                if (data.settings) {
+                    if (data.settings.notifications) {
+                        localStorage.setItem('notifications_enabled', data.settings.notifications);
+                    }
+                    // PIN settings are not restored for security
+                }
+
+                // Clear file input
+                fileInput.value = '';
+
+                // Refresh UI
+                this.renderHome();
+                this.updateCategoryCounts();
+                this.updateNotificationBadge();
+
+                HapticFeedback.success();
+                this.showToast('Backup restored successfully!', 'success');
+
+                // Close settings and show home
+                this.closeSettings();
+                this.switchView('home');
+
+            } catch (error) {
+                console.error('Backup restore failed:', error);
+                HapticFeedback.error();
+                this.showToast('Invalid backup file or restore failed', 'error');
+                fileInput.value = '';
+            }
+        };
+
+        reader.readAsText(file);
+    }
+
+    clearAllData() {
+        // Clear all categories
+        const categories = ['todos', 'cars', 'finances', 'bills', 'subscriptions', 'insurances', 'checking', 'savings'];
+        categories.forEach(category => {
+            const items = storage.getAll(category) || [];
+            items.forEach(item => {
+                storage.delete(category, item.id);
+            });
+        });
+
+        // Clear user profile but keep PIN settings for security
+        localStorage.removeItem('userProfile');
+        // Note: We keep PIN settings for security reasons
     }
 
     showExportMenu() {
@@ -616,6 +1262,20 @@ class HomeManagerApp {
             touchStartX = 0;
             isSwiping = false;
         }, { passive: true });
+
+        // PIN Security: Auto-lock when app goes to background
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && localStorage.getItem('pin_lock_enabled') === 'true') {
+                this.lockApp();
+            }
+        });
+
+        // PIN Security: Lock when page unloads
+        window.addEventListener('beforeunload', () => {
+            if (localStorage.getItem('pin_lock_enabled') === 'true') {
+                localStorage.setItem('app_locked', 'true');
+            }
+        });
     }
 
     handleSwipe(startX, startY, endX, endY) {
@@ -3765,72 +4425,424 @@ class HomeManagerApp {
         const container = document.getElementById('tasks-container');
         if (!container) return;
 
-        // Calculate some basic insights
+        // Get all data for charts
         const finances = storage.getFinances();
-        const totalIncome = finances.filter(f => f.type === 'income').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
-        const totalExpenses = finances.filter(f => f.type === 'expense').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
-        const netIncome = totalIncome - totalExpenses;
+        const savings = storage.getAll('savings') || [];
+        const checking = storage.getAll('checking') || [];
+        const bills = storage.getBills();
+        const subscriptions = storage.getAll('subscriptions') || [];
+        const insurances = storage.getAll('insurances') || [];
 
-        const cars = storage.getCars();
-        const totalCarValue = cars.reduce((sum, car) => sum + (parseFloat(car.amountOwed) || 0), 0);
+        // Prepare chart data
+        const financeChartData = this.prepareFinanceChartData(finances);
+        const savingsChartData = this.prepareSavingsChartData(savings, checking);
+        const billsChartData = this.prepareBillsChartData(bills, subscriptions, insurances);
 
         container.innerHTML = `
             <div class="view-header">
                 <h1>Financial Insights</h1>
+                <p class="view-subtitle">Track your finances over time</p>
             </div>
 
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                    </div>
-                    <div class="insight-content">
-                        <div class="insight-value">$${totalIncome.toFixed(0)}</div>
-                        <div class="insight-label">Total Income</div>
-                    </div>
-                </div>
-
-                <div class="insight-card">
-                    <div class="insight-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/>
-                        </svg>
-                    </div>
-                    <div class="insight-content">
-                        <div class="insight-value">$${totalExpenses.toFixed(0)}</div>
-                        <div class="insight-label">Total Expenses</div>
+            <div class="charts-container">
+                <!-- Finance Chart -->
+                <div class="chart-section">
+                    <h3 class="chart-title">Income vs Expenses</h3>
+                    <div class="chart-wrapper">
+                        <div class="chart-canvas" id="finance-chart">
+                            ${this.renderLineChart(financeChartData, 'finance')}
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #22c55e"></div>
+                                <span>Income</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444"></div>
+                                <span>Expenses</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="insight-card">
-                    <div class="insight-icon" style="color: ${netIncome >= 0 ? '#22c55e' : '#ef4444'}">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                            <path d="M8 10l4 4"/>
-                            <path d="M16 14l-4-4"/>
-                        </svg>
-                    </div>
-                    <div class="insight-content">
-                        <div class="insight-value" style="color: ${netIncome >= 0 ? '#22c55e' : '#ef4444'};">$${netIncome.toFixed(0)}</div>
-                        <div class="insight-label">Net Income</div>
+                <!-- Savings Chart -->
+                <div class="chart-section">
+                    <h3 class="chart-title">Savings & Checking Balance</h3>
+                    <div class="chart-wrapper">
+                        <div class="chart-canvas" id="savings-chart">
+                            ${this.renderAreaChart(savingsChartData, 'savings')}
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #3b82f6"></div>
+                                <span>Savings</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #8b5cf6"></div>
+                                <span>Checking</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="insight-card">
-                    <div class="insight-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/>
-                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                            <path d="M7 21h10"/>
-                        </svg>
-                    </div>
-                    <div class="insight-content">
-                        <div class="insight-value">$${totalCarValue.toFixed(0)}</div>
-                        <div class="insight-label">Car Loans</div>
+                <!-- Bills & Subscriptions Chart -->
+                <div class="chart-section">
+                    <h3 class="chart-title">Monthly Recurring Costs</h3>
+                    <div class="chart-wrapper">
+                        <div class="chart-canvas" id="bills-chart">
+                            ${this.renderBarChart(billsChartData, 'bills')}
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f59e0b"></div>
+                                <span>Bills</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ec4899"></div>
+                                <span>Subscriptions</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #06b6d4"></div>
+                                <span>Insurance</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="insights-summary">
+                <div class="summary-grid">
+                    ${this.renderSummaryCards()}
+                </div>
+            </div>
+        `;
+    }
+
+    prepareFinanceChartData(finances) {
+        const monthlyData = {};
+        const now = new Date();
+
+        // Group by month for the last 12 months
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = date.toISOString().slice(0, 7); // YYYY-MM format
+            monthlyData[key] = { income: 0, expenses: 0, date: date };
+        }
+
+        // Aggregate data
+        finances.forEach(item => {
+            if (item.date) {
+                const date = new Date(item.date);
+                const key = date.toISOString().slice(0, 7);
+                if (monthlyData[key]) {
+                    const amount = parseFloat(item.amount) || 0;
+                    if (item.type === 'income') {
+                        monthlyData[key].income += amount;
+                    } else if (item.type === 'expense') {
+                        monthlyData[key].expenses += amount;
+                    }
+                }
+            }
+        });
+
+        return Object.values(monthlyData);
+    }
+
+    prepareSavingsChartData(savings, checking) {
+        const monthlyData = {};
+        const now = new Date();
+
+        // Initialize last 12 months
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = date.toISOString().slice(0, 7);
+            monthlyData[key] = { savings: 0, checking: 0, date: date };
+        }
+
+        // Add savings data
+        savings.forEach(item => {
+            if (item.date) {
+                const date = new Date(item.date);
+                const key = date.toISOString().slice(0, 7);
+                if (monthlyData[key]) {
+                    monthlyData[key].savings = parseFloat(item.currentAmount) || 0;
+                }
+            }
+        });
+
+        // Add checking data
+        checking.forEach(item => {
+            if (item.date) {
+                const date = new Date(item.date);
+                const key = date.toISOString().slice(0, 7);
+                if (monthlyData[key]) {
+                    monthlyData[key].checking += parseFloat(item.amount) || 0;
+                }
+            }
+        });
+
+        return Object.values(monthlyData);
+    }
+
+    prepareBillsChartData(bills, subscriptions, insurances) {
+        const monthlyData = {};
+        const now = new Date();
+
+        // Initialize last 12 months
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = date.toISOString().slice(0, 7);
+            monthlyData[key] = { bills: 0, subscriptions: 0, insurance: 0, date: date };
+        }
+
+        // Add bills data
+        bills.forEach(item => {
+            if (item.dueDate) {
+                const date = new Date(item.dueDate);
+                const key = date.toISOString().slice(0, 7);
+                if (monthlyData[key] && item.amount) {
+                    monthlyData[key].bills += parseFloat(item.amount) || 0;
+                }
+            }
+        });
+
+        // Add subscriptions data
+        subscriptions.forEach(item => {
+            if (item.dueDate) {
+                const date = new Date(item.dueDate);
+                const key = date.toISOString().slice(0, 7);
+                if (monthlyData[key] && item.amount) {
+                    monthlyData[key].subscriptions += parseFloat(item.amount) || 0;
+                }
+            }
+        });
+
+        // Add insurance data
+        insurances.forEach(item => {
+            if (item.expiryDate) {
+                const date = new Date(item.expiryDate);
+                const key = date.toISOString().slice(0, 7);
+                if (monthlyData[key] && item.premium) {
+                    monthlyData[key].insurance += parseFloat(item.premium) || 0;
+                }
+            }
+        });
+
+        return Object.values(monthlyData);
+    }
+
+    renderLineChart(data, type) {
+        if (data.length === 0) {
+            return '<div class="chart-placeholder">No data available</div>';
+        }
+
+        const width = 400;
+        const height = 200;
+        const padding = 40;
+
+        // Find max values
+        const maxIncome = Math.max(...data.map(d => d.income || 0));
+        const maxExpenses = Math.max(...data.map(d => d.expenses || 0));
+        const maxValue = Math.max(maxIncome, maxExpenses);
+
+        if (maxValue === 0) {
+            return '<div class="chart-placeholder">No financial data</div>';
+        }
+
+        // Scale functions
+        const xScale = (index) => padding + (index / (data.length - 1)) * (width - 2 * padding);
+        const yScale = (value) => height - padding - (value / maxValue) * (height - 2 * padding);
+
+        // Generate path for income line
+        let incomePath = 'M ';
+        data.forEach((d, i) => {
+            const x = xScale(i);
+            const y = yScale(d.income || 0);
+            incomePath += i === 0 ? `${x} ${y}` : ` L ${x} ${y}`;
+        });
+
+        // Generate path for expenses line
+        let expensePath = 'M ';
+        data.forEach((d, i) => {
+            const x = xScale(i);
+            const y = yScale(d.expenses || 0);
+            expensePath += i === 0 ? `${x} ${y}` : ` L ${x} ${y}`;
+        });
+
+        return `
+            <svg width="${width}" height="${height}" class="chart-svg">
+                <!-- Grid lines -->
+                <g class="chart-grid">
+                    ${Array.from({length: 5}, (_, i) => {
+                        const y = padding + (i / 4) * (height - 2 * padding);
+                        return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>`;
+                    }).join('')}
+                </g>
+
+                <!-- Income line -->
+                <path d="${incomePath}" stroke="#22c55e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+                <!-- Expense line -->
+                <path d="${expensePath}" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+                <!-- Data points -->
+                ${data.map((d, i) => {
+                    const incomeX = xScale(i);
+                    const incomeY = yScale(d.income || 0);
+                    const expenseX = xScale(i);
+                    const expenseY = yScale(d.expenses || 0);
+
+                    return `
+                        <circle cx="${incomeX}" cy="${incomeY}" r="4" fill="#22c55e"/>
+                        <circle cx="${expenseX}" cy="${expenseY}" r="4" fill="#ef4444"/>
+                    `;
+                }).join('')}
+            </svg>
+        `;
+    }
+
+    renderAreaChart(data, type) {
+        if (data.length === 0) {
+            return '<div class="chart-placeholder">No savings data</div>';
+        }
+
+        const width = 400;
+        const height = 200;
+        const padding = 40;
+
+        // Find max values
+        const maxSavings = Math.max(...data.map(d => d.savings || 0));
+        const maxChecking = Math.max(...data.map(d => d.checking || 0));
+        const maxValue = Math.max(maxSavings, maxChecking);
+
+        if (maxValue === 0) {
+            return '<div class="chart-placeholder">No savings or checking data</div>';
+        }
+
+        // Scale functions
+        const xScale = (index) => padding + (index / (data.length - 1)) * (width - 2 * padding);
+        const yScale = (value) => height - padding - (value / maxValue) * (height - 2 * padding);
+
+        // Generate area paths
+        let savingsPath = 'M ';
+        let checkingPath = 'M ';
+
+        data.forEach((d, i) => {
+            const x = xScale(i);
+            const savingsY = yScale(d.savings || 0);
+            const checkingY = yScale(d.checking || 0);
+
+            savingsPath += i === 0 ? `${x} ${savingsY}` : ` L ${x} ${savingsY}`;
+            checkingPath += i === 0 ? `${x} ${checkingY}` : ` L ${x} ${checkingY}`;
+        });
+
+        // Close the area paths
+        savingsPath += ` L ${xScale(data.length - 1)} ${height - padding} L ${xScale(0)} ${height - padding} Z`;
+        checkingPath += ` L ${xScale(data.length - 1)} ${height - padding} L ${xScale(0)} ${height - padding} Z`;
+
+        return `
+            <svg width="${width}" height="${height}" class="chart-svg">
+                <!-- Savings area -->
+                <path d="${savingsPath}" fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" stroke-width="2"/>
+
+                <!-- Checking area -->
+                <path d="${checkingPath}" fill="rgba(139, 92, 246, 0.3)" stroke="#8b5cf6" stroke-width="2"/>
+            </svg>
+        `;
+    }
+
+    renderBarChart(data, type) {
+        if (data.length === 0) {
+            return '<div class="chart-placeholder">No recurring cost data</div>';
+        }
+
+        const width = 400;
+        const height = 200;
+        const padding = 40;
+
+        // Find max values
+        const maxBills = Math.max(...data.map(d => d.bills || 0));
+        const maxSubscriptions = Math.max(...data.map(d => d.subscriptions || 0));
+        const maxInsurance = Math.max(...data.map(d => d.insurance || 0));
+        const maxValue = Math.max(maxBills, maxSubscriptions, maxInsurance);
+
+        if (maxValue === 0) {
+            return '<div class="chart-placeholder">No recurring costs</div>';
+        }
+
+        const barWidth = (width - 2 * padding) / data.length;
+        const groupWidth = barWidth * 0.8;
+        const barSpacing = barWidth * 0.2;
+        const individualBarWidth = groupWidth / 3;
+
+        // Scale function
+        const yScale = (value) => height - padding - (value / maxValue) * (height - 2 * padding);
+
+        return `
+            <svg width="${width}" height="${height}" class="chart-svg">
+                ${data.map((d, i) => {
+                    const x = padding + i * barWidth + barSpacing;
+
+                    const billsHeight = height - padding - yScale(d.bills || 0);
+                    const subscriptionsHeight = height - padding - yScale(d.subscriptions || 0);
+                    const insuranceHeight = height - padding - yScale(d.insurance || 0);
+
+                    return `
+                        <!-- Bills bar -->
+                        <rect x="${x}" y="${yScale(d.bills || 0)}" width="${individualBarWidth}" height="${billsHeight}"
+                              fill="#f59e0b" rx="2"/>
+                        <!-- Subscriptions bar -->
+                        <rect x="${x + individualBarWidth}" y="${yScale(d.subscriptions || 0)}" width="${individualBarWidth}" height="${subscriptionsHeight}"
+                              fill="#ec4899" rx="2"/>
+                        <!-- Insurance bar -->
+                        <rect x="${x + 2 * individualBarWidth}" y="${yScale(d.insurance || 0)}" width="${individualBarWidth}" height="${insuranceHeight}"
+                              fill="#06b6d4" rx="2"/>
+                    `;
+                }).join('')}
+            </svg>
+        `;
+    }
+
+    renderSummaryCards() {
+        const finances = storage.getFinances();
+        const savings = storage.getAll('savings') || [];
+        const checking = storage.getAll('checking') || [];
+        const bills = storage.getBills();
+        const subscriptions = storage.getAll('subscriptions') || [];
+        const insurances = storage.getAll('insurances') || [];
+
+        const totalIncome = finances.filter(f => f.type === 'income').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+        const totalExpenses = finances.filter(f => f.type === 'expense').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+        const netIncome = totalIncome - totalExpenses;
+
+        const totalSavings = savings.reduce((sum, s) => sum + (parseFloat(s.currentAmount) || 0), 0);
+        const totalChecking = checking.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+
+        const monthlyBills = bills.filter(b => b.paid !== true).reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0);
+        const monthlySubscriptions = subscriptions.reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0);
+        const monthlyInsurance = insurances.reduce((sum, i) => sum + (parseFloat(i.premium) || 0), 0);
+
+        return `
+            <div class="summary-card">
+                <div class="summary-icon">💰</div>
+                <div class="summary-value">$${netIncome.toFixed(0)}</div>
+                <div class="summary-label">Net Income</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">💸</div>
+                <div class="summary-value">$${totalSavings.toFixed(0)}</div>
+                <div class="summary-label">Total Savings</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">🏦</div>
+                <div class="summary-value">$${totalChecking.toFixed(0)}</div>
+                <div class="summary-label">Checking Balance</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">📄</div>
+                <div class="summary-value">$${monthlyBills.toFixed(0)}</div>
+                <div class="summary-label">Monthly Bills</div>
             </div>
         `;
     }
