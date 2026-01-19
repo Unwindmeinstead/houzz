@@ -3695,6 +3695,12 @@ button, .nav-item, .task-item {
     animation: fadeIn 0.3s ease;
 }
 
+.pin-overlay.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 .pin-modal {
     background: var(--bg-black);
     border: 1px solid rgba(255, 255, 255, 0.1);

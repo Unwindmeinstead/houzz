@@ -250,33 +250,67 @@ class HomeManagerApp {
         });
 
         confirmBtn.addEventListener('click', () => {
+            console.log('Confirm button clicked, step:', step, 'pin:', pin, 'confirmPin:', confirmPin);
             HapticFeedback.medium();
             if (step === 'create') {
+                console.log('Moving to confirm step');
                 step = 'confirm';
                 modal.querySelector('.pin-header h3').textContent = 'Confirm PIN';
                 modal.querySelector('.pin-header p').textContent = 'Enter your PIN again';
                 updateDisplay();
             } else {
+                console.log('Checking PINs match:', pin === confirmPin);
                 if (pin === confirmPin) {
+                    console.log('PINs match, saving PIN...');
                     localStorage.setItem('app_pin', pin);
                     localStorage.setItem('pin_lock_enabled', 'true');
 
                     const toggle = document.getElementById('pin-lock-toggle');
-                    if (toggle) toggle.checked = true;
+                    if (toggle) {
+                        toggle.checked = true;
+                        console.log('Toggle updated');
+                    }
                     this.showPinOptions(true);
                     this.updatePinStatus();
 
                     HapticFeedback.success();
                     this.showToast('PIN set successfully', 'success');
+                    console.log('Closing modal...');
 
-                    // Close modal immediately
-                    modal.style.display = 'none';
-                    setTimeout(() => {
-                        if (modal.parentNode) {
-                            modal.parentNode.removeChild(modal);
+                    // Force close modal immediately
+                    try {
+                        modal.classList.add('hidden');
+                        modal.style.display = 'none';
+                        modal.style.visibility = 'hidden';
+                        modal.style.opacity = '0';
+
+                        // Remove from DOM after a short delay
+                        setTimeout(() => {
+                            try {
+                                if (modal && modal.parentNode) {
+                                    console.log('Removing modal from DOM');
+                                    modal.parentNode.removeChild(modal);
+                                } else {
+                                    console.log('Modal already removed or not found');
+                                }
+                            } catch (e) {
+                                console.error('Error removing modal:', e);
+                            }
+                        }, 200);
+                    } catch (e) {
+                        console.error('Error hiding modal:', e);
+                        // Fallback - try to remove directly
+                        try {
+                            if (modal && modal.parentNode) {
+                                modal.parentNode.removeChild(modal);
+                            }
+                        } catch (e2) {
+                            console.error('Fallback modal removal failed:', e2);
                         }
-                    }, 100);
+                    }
+
                 } else {
+                    console.log('PINs do not match, resetting');
                     HapticFeedback.error();
                     this.showToast('PINs do not match. Try again.', 'error');
                     pin = '';
@@ -284,7 +318,8 @@ class HomeManagerApp {
                     step = 'create';
                     modal.querySelector('.pin-header h3').textContent = 'Set PIN';
                     modal.querySelector('.pin-header p').textContent = 'Create a 4-digit PIN to secure your app';
-                    updateDisplay();
+                    updateConfirmBtn();
+                    updateDots();
                 }
             }
         });
@@ -377,14 +412,35 @@ class HomeManagerApp {
                         if (enteredPin.length === 4) {
                             setTimeout(() => {
                                 if (enteredPin === storedPin) {
+                                    console.log('Correct PIN entered, unlocking...');
                                     this.unlockApp();
-                                    // Close modal immediately
-                                    modal.style.display = 'none';
-                                    setTimeout(() => {
-                                        if (modal.parentNode) {
-                                            modal.parentNode.removeChild(modal);
+                                    // Force close modal immediately
+                                    try {
+                                        modal.classList.add('hidden');
+                                        modal.style.display = 'none';
+                                        modal.style.visibility = 'hidden';
+                                        modal.style.opacity = '0';
+
+                                        setTimeout(() => {
+                                            try {
+                                                if (modal && modal.parentNode) {
+                                                    modal.parentNode.removeChild(modal);
+                                                    console.log('PIN entry modal removed');
+                                                }
+                                            } catch (e) {
+                                                console.error('Error removing PIN entry modal:', e);
+                                            }
+                                        }, 200);
+                                    } catch (e) {
+                                        console.error('Error hiding PIN entry modal:', e);
+                                        try {
+                                            if (modal && modal.parentNode) {
+                                                modal.parentNode.removeChild(modal);
+                                            }
+                                        } catch (e2) {
+                                            console.error('Fallback PIN entry modal removal failed:', e2);
                                         }
-                                    }, 100);
+                                    }
                                 } else {
                                     attempts++;
                                     HapticFeedback.error();
@@ -538,16 +594,41 @@ class HomeManagerApp {
                             setTimeout(() => {
                                 const storedPin = localStorage.getItem('app_pin');
                                 if (enteredPin === storedPin) {
-                                    // Close modal immediately
-                                    modal.style.display = 'none';
-                                    setTimeout(() => {
-                                        if (modal.parentNode) {
-                                            modal.parentNode.removeChild(modal);
+                                    console.log('PIN verification successful');
+                                    // Force close modal immediately
+                                    try {
+                                        modal.classList.add('hidden');
+                                        modal.style.display = 'none';
+                                        modal.style.visibility = 'hidden';
+                                        modal.style.opacity = '0';
+
+                                        setTimeout(() => {
+                                            try {
+                                                if (modal && modal.parentNode) {
+                                                    modal.parentNode.removeChild(modal);
+                                                    console.log('PIN verification modal removed');
+                                                    if (reason === 'change') {
+                                                        console.log('Showing PIN setup for change');
+                                                        this.showPinSetup();
+                                                    }
+                                                }
+                                            } catch (e) {
+                                                console.error('Error removing PIN verification modal:', e);
+                                            }
+                                        }, 200);
+                                    } catch (e) {
+                                        console.error('Error hiding PIN verification modal:', e);
+                                        try {
+                                            if (modal && modal.parentNode) {
+                                                modal.parentNode.removeChild(modal);
+                                                if (reason === 'change') {
+                                                    this.showPinSetup();
+                                                }
+                                            }
+                                        } catch (e2) {
+                                            console.error('Fallback PIN verification modal removal failed:', e2);
                                         }
-                                        if (reason === 'change') {
-                                            this.showPinSetup();
-                                        }
-                                    }, 100);
+                                    }
                                 } else {
                                     HapticFeedback.error();
                                     this.showToast('Incorrect PIN', 'error');
