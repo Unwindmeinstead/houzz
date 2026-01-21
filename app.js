@@ -1,4 +1,4 @@
-// App Version: 1.0.0 - PIN feature removed
+// App Version: 1.0.0
 // Haptic Feedback Utility
 const HapticFeedback = {
     // Light impact (for taps)
@@ -93,16 +93,48 @@ class HomeManagerApp {
         overlay.classList.remove('active');
     }
 
-        const overlay = document.createElement('div');
-        overlay.className = 'pin-overlay';
-        return overlay;
+
+
+    // Backup & Restore Functionality
+    createBackup() {
+        try {
+            const backupData = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                data: {
+                    todos: storage.getTodos(),
+                    cars: storage.getCars(),
+                    finances: storage.getFinances(),
+                    bills: storage.getBills(),
+                    subscriptions: storage.getAll('subscriptions') || [],
+                    insurances: storage.getAll('insurances') || [],
+                    checking: storage.getAll('checking') || [],
+                    savings: storage.getAll('savings') || [],
+                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}'),
+                    settings: {
+                        notifications: localStorage.getItem('notifications_enabled')
+                    }
+                }
+            };
+
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `houzz-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            HapticFeedback.success();
+            this.showToast('Backup created successfully!', 'success');
+        } catch (error) {
+            console.error('Backup creation failed:', error);
+            HapticFeedback.error();
+            this.showToast('Backup creation failed', 'error');
+        }
     }
-
-
-
-
-
-
 
     restoreBackup(fileInput) {
         const file = fileInput.files[0];
@@ -160,12 +192,11 @@ class HomeManagerApp {
                     localStorage.setItem('userProfile', JSON.stringify(data.userProfile));
                 }
 
-                // Restore settings (but not PIN)
+                // Restore settings
                 if (data.settings) {
                     if (data.settings.notifications) {
                         localStorage.setItem('notifications_enabled', data.settings.notifications);
                     }
-                    // PIN settings are not restored for security
                 }
 
                 // Clear file input
@@ -204,9 +235,8 @@ class HomeManagerApp {
             });
         });
 
-        // Clear user profile but keep PIN settings for security
+        // Clear user profile
         localStorage.removeItem('userProfile');
-        // Note: We keep PIN settings for security reasons
     }
 
     showExportMenu() {
