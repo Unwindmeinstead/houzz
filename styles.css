@@ -3706,7 +3706,6 @@ button, .nav-item, .task-item {
 
 
 /* PIN Security Styles */
-.pin-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -3722,13 +3721,11 @@ button, .nav-item, .task-item {
     animation: fadeIn 0.3s ease;
 }
 
-.pin-overlay.hidden {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
 }
 
-.pin-modal {
     background: var(--bg-black);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
@@ -3740,11 +3737,9 @@ button, .nav-item, .task-item {
     animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.pin-header {
     margin-bottom: 32px;
 }
 
-.pin-header h3 {
     font-size: 24px;
     font-weight: 700;
     color: var(--text-white);
@@ -3752,24 +3747,20 @@ button, .nav-item, .task-item {
     letter-spacing: -0.3px;
 }
 
-.pin-header p {
     font-size: 15px;
     color: var(--text-gray);
     line-height: 1.4;
 }
 
-.pin-display {
     margin-bottom: 32px;
 }
 
-.pin-dots {
     display: flex;
     justify-content: center;
     gap: 16px;
     margin-bottom: 8px;
 }
 
-.pin-dot {
     width: 16px;
     height: 16px;
     border-radius: 50%;
@@ -3778,13 +3769,11 @@ button, .nav-item, .task-item {
     background: transparent;
 }
 
-.pin-dot.active {
     background: var(--text-white);
     border-color: var(--text-white);
     transform: scale(1.1);
 }
 
-.pin-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
@@ -3794,7 +3783,6 @@ button, .nav-item, .task-item {
     margin-right: auto;
 }
 
-.pin-key {
     width: 80px;
     height: 80px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -3813,52 +3801,40 @@ button, .nav-item, .task-item {
     overflow: hidden;
 }
 
-.pin-key:not(.pin-spacer):not(.pin-backspace):hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
 }
 
-.pin-key:not(.pin-spacer):not(.pin-backspace):active,
-.pin-key.pressed {
     transform: translateY(0) scale(0.95);
     background: rgba(255, 255, 255, 0.08);
 }
 
-.pin-spacer {
     background: transparent !important;
     border: none !important;
     cursor: default !important;
 }
 
-.pin-spacer:hover,
-.pin-spacer:active {
     transform: none !important;
     background: transparent !important;
 }
 
-.pin-backspace {
     color: #ef4444;
 }
 
-.pin-backspace:hover {
     background: rgba(239, 68, 68, 0.1);
     border-color: rgba(239, 68, 68, 0.3);
 }
 
-.pin-backspace svg {
     width: 20px;
     height: 20px;
 }
 
-.pin-actions {
     display: flex;
     gap: 12px;
     justify-content: center;
 }
 
-.pin-btn-secondary,
-.pin-btn-primary {
     flex: 1;
     padding: 14px 20px;
     border-radius: 12px;
@@ -3870,38 +3846,31 @@ button, .nav-item, .task-item {
     border: none;
 }
 
-.pin-btn-secondary {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-white);
 }
 
-.pin-btn-secondary:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-.pin-btn-secondary:active {
     transform: scale(0.98);
 }
 
-.pin-btn-primary {
     background: #4ade80;
     color: white;
     border: 1px solid #4ade80;
 }
 
-.pin-btn-primary:hover:not(:disabled) {
     background: #22c55e;
     border-color: #22c55e;
     transform: translateY(-1px);
 }
 
-.pin-btn-primary:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
 }
 
-.pin-btn-primary:disabled {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.4);
@@ -3917,29 +3886,23 @@ button, .nav-item, .task-item {
 
 /* Responsive PIN UI */
 @media (max-width: 480px) {
-    .pin-modal {
         margin: 16px;
         padding: 24px 20px;
     }
 
-    .pin-keypad {
         gap: 8px;
         max-width: 240px;
     }
 
-    .pin-key {
         width: 70px;
         height: 70px;
         font-size: 20px;
     }
 
-    .pin-actions {
         flex-direction: column;
         gap: 8px;
     }
 
-    .pin-btn-secondary,
-    .pin-btn-primary {
         padding: 16px 20px;
     }
 }

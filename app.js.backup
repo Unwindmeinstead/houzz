@@ -86,6 +86,8 @@ class HomeManagerApp {
         overlay.classList.add('active');
         // Update notification UI when opening settings
         this.checkNotificationPermission();
+        // Update PIN lock UI
+        this.updatePinSettings();
     }
 
     closeSettings() {
@@ -93,16 +95,692 @@ class HomeManagerApp {
         overlay.classList.remove('active');
     }
 
+    // PIN Security System
+    togglePinLock() {
+        const toggle = document.getElementById('pin-lock-toggle');
+        const isEnabled = toggle.checked;
+
+        if (isEnabled) {
+            const pin = localStorage.getItem('app_pin');
+            if (!pin) {
+                this.showPinSetup();
+                return;
+            }
+            localStorage.setItem('pin_lock_enabled', 'true');
+            this.showPinOptions(true);
+            this.updatePinStatus();
+            HapticFeedback.success();
+            this.showToast('PIN lock enabled', 'success');
+        } else {
+            localStorage.setItem('pin_lock_enabled', 'false');
+            this.showPinOptions(false);
+            this.updatePinStatus();
+            HapticFeedback.success();
+            this.showToast('PIN lock disabled', 'success');
+        }
+    }
+
+    showPinSetup() {
+        const modal = this.createPinModal('setup');
+        modal.innerHTML = `
+            <div class="pin-modal">
+                <div class="pin-header">
+                    <h3>Set PIN</h3>
+                    <p>Create a 4-digit PIN to secure your app</p>
+                </div>
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-value="1">1</button>
+                    <button class="pin-key" data-value="2">2</button>
+                    <button class="pin-key" data-value="3">3</button>
+                    <button class="pin-key" data-value="4">4</button>
+                    <button class="pin-key" data-value="5">5</button>
+                    <button class="pin-key" data-value="6">6</button>
+                    <button class="pin-key" data-value="7">7</button>
+                    <button class="pin-key" data-value="8">8</button>
+                    <button class="pin-key" data-value="9">9</button>
+                    <button class="pin-key pin-spacer"></button>
+                    <button class="pin-key" data-value="0">0</button>
+                    <button class="pin-key pin-backspace" id="pin-backspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-actions">
+                    <button class="pin-btn-secondary" onclick="this.closest('.pin-overlay').remove()">Cancel</button>
+                    <button class="pin-btn-primary" id="pin-confirm-btn" disabled>Set PIN</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.initPinSetup(modal);
+    }
+
+    createPinModal(type) {
         const overlay = document.createElement('div');
         overlay.className = 'pin-overlay';
         return overlay;
     }
 
+    initPinSetup(modal) {
+        let pin = '';
+        let confirmPin = '';
+        let step = 'create';
+
+        const dots = modal.querySelectorAll('.pin-dot');
+        const keys = modal.querySelectorAll('.pin-key:not(.pin-spacer)');
+        const backspace = modal.querySelector('#pin-backspace');
+        const confirmBtn = modal.querySelector('#pin-confirm-btn');
+
+        const updateDisplay = () => {
+            const currentPin = step === 'create' ? pin : confirmPin;
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < currentPin.length);
+            });
+            confirmBtn.disabled = currentPin.length !== 4;
+            confirmBtn.textContent = step === 'create' ? 'Confirm PIN' : 'Set PIN';
+        };
+
+        keys.forEach(key => {
+            if (key.dataset.value) {
+                // Handle touch events for mobile
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    HapticFeedback.light();
+                    key.classList.add('pressed');
+                }, { passive: false });
+
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    key.classList.remove('pressed');
+
+                    // Process the key press on touch end
+                    const value = key.dataset.value;
+                    const currentPin = step === 'create' ? pin : confirmPin;
+
+                    if (currentPin.length < 4) {
+                        if (step === 'create') {
+                            pin += value;
+                        } else {
+                            confirmPin += value;
+                        }
+                        updateDisplay();
+                    }
+                }, { passive: false });
+
+                // Handle click events for desktop
+                key.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const value = key.dataset.value;
+                    const currentPin = step === 'create' ? pin : confirmPin;
+
+                    if (currentPin.length < 4) {
+                        if (step === 'create') {
+                            pin += value;
+                        } else {
+                            confirmPin += value;
+                        }
+                        updateDisplay();
+                    }
+                });
+            }
+        });
+
+        backspace.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            HapticFeedback.light();
+            backspace.classList.add('pressed');
+        }, { passive: false });
+
+        backspace.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            backspace.classList.remove('pressed');
+        }, { passive: false });
+
+        backspace.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (step === 'create') {
+                pin = pin.slice(0, -1);
+            } else {
+                confirmPin = confirmPin.slice(0, -1);
+            }
+            updateDisplay();
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            console.log('Confirm button clicked, step:', step, 'pin:', pin, 'confirmPin:', confirmPin);
+            HapticFeedback.medium();
+            if (step === 'create') {
+                console.log('Moving to confirm step');
+                step = 'confirm';
+                modal.querySelector('.pin-header h3').textContent = 'Confirm PIN';
+                modal.querySelector('.pin-header p').textContent = 'Enter your PIN again';
+                updateDisplay();
+            } else {
+                console.log('Checking PINs match:', pin === confirmPin);
+                if (pin === confirmPin) {
+                    console.log('PINs match, saving PIN...');
+                    localStorage.setItem('app_pin', pin);
+                    localStorage.setItem('pin_lock_enabled', 'true');
+
+                    const toggle = document.getElementById('pin-lock-toggle');
+                    if (toggle) {
+                        toggle.checked = true;
+                        console.log('Toggle updated');
+                    }
+                    this.showPinOptions(true);
+                    this.updatePinStatus();
+
+                    HapticFeedback.success();
+                    this.showToast('PIN set successfully', 'success');
+                    console.log('Closing modal...');
+
+                    // Close modal immediately
+                    if (modal && modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                        console.log('PIN setup modal removed successfully');
+                    } else {
+                        console.error('Could not find modal to remove');
+                    }
+
+                } else {
+                    console.log('PINs do not match, resetting');
+                    HapticFeedback.error();
+                    this.showToast('PINs do not match. Try again.', 'error');
+                    pin = '';
+                    confirmPin = '';
+                    step = 'create';
+                    modal.querySelector('.pin-header h3').textContent = 'Set PIN';
+                    modal.querySelector('.pin-header p').textContent = 'Create a 4-digit PIN to secure your app';
+                    updateConfirmBtn();
+                    updateDots();
+                }
+            }
+        });
+    }
+
+    showPinEntry() {
+        const modal = this.createPinModal('entry');
+        modal.innerHTML = `
+            <div class="pin-modal">
+                <div class="pin-header">
+                    <h3>Enter PIN</h3>
+                    <p>Enter your 4-digit PIN to unlock</p>
+                </div>
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-value="1">1</button>
+                    <button class="pin-key" data-value="2">2</button>
+                    <button class="pin-key" data-value="3">3</button>
+                    <button class="pin-key" data-value="4">4</button>
+                    <button class="pin-key" data-value="5">5</button>
+                    <button class="pin-key" data-value="6">6</button>
+                    <button class="pin-key" data-value="7">7</button>
+                    <button class="pin-key" data-value="8">8</button>
+                    <button class="pin-key" data-value="9">9</button>
+                    <button class="pin-key pin-spacer"></button>
+                    <button class="pin-key" data-value="0">0</button>
+                    <button class="pin-key pin-backspace" id="pin-entry-backspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-actions">
+                    <button class="pin-btn-secondary" onclick="app.forgotPin()">Forgot PIN?</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.initPinEntry(modal);
+    }
+
+    initPinEntry(modal) {
+        let enteredPin = '';
+        let attempts = 0;
+        const maxAttempts = 5;
+
+        const dots = modal.querySelectorAll('.pin-dot');
+        const keys = modal.querySelectorAll('.pin-key:not(.pin-spacer)');
+        const backspace = modal.querySelector('#pin-entry-backspace');
+        const storedPin = localStorage.getItem('app_pin');
+
+        const updateDisplay = () => {
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < enteredPin.length);
+            });
+        };
+
+        keys.forEach(key => {
+            if (key.dataset.value) {
+                // Handle touch events for mobile
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    HapticFeedback.light();
+                    key.classList.add('pressed');
+                }, { passive: false });
+
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    key.classList.remove('pressed');
+
+                    // Process the key press on touch end
+                    const value = key.dataset.value;
+                    if (enteredPin.length < 4) {
+                        enteredPin += value;
+                        updateDisplay();
+
+                        if (enteredPin.length === 4) {
+                            setTimeout(() => {
+                                if (enteredPin === storedPin) {
+                                    console.log('Correct PIN entered, unlocking...');
+                                    this.unlockApp();
+                                    setTimeout(() => {
+                                        if (modal && modal.parentNode) {
+                                            modal.parentNode.removeChild(modal);
+                                            console.log('PIN entry modal removed successfully');
+                                        }
+                                    }, 100);
+                                } else {
+                                    attempts++;
+                                    HapticFeedback.error();
+                                    if (attempts >= maxAttempts) {
+                                        this.showToast('Too many failed attempts. Try again later.', 'error');
+                                        setTimeout(() => location.reload(), 30000);
+                                    } else {
+                                        this.showToast(`Incorrect PIN. ${maxAttempts - attempts} attempts remaining.`, 'error');
+                                        enteredPin = '';
+                                        updateDisplay();
+                                    }
+                                }
+                            }, 150);
+                        }
+                    }
+                }, { passive: false });
+
+                // Handle click events for desktop
+                key.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const value = key.dataset.value;
+                    if (enteredPin.length < 4) {
+                        enteredPin += value;
+                        updateDisplay();
+
+                        if (enteredPin.length === 4) {
+                            setTimeout(() => {
+                                if (enteredPin === storedPin) {
+                                    console.log('Correct PIN entered, unlocking...');
+                                    this.unlockApp();
+                                    setTimeout(() => {
+                                        if (modal && modal.parentNode) {
+                                            modal.parentNode.removeChild(modal);
+                                            console.log('PIN entry modal removed successfully');
+                                        }
+                                    }, 100);
+                                } else {
+                                    attempts++;
+                                    HapticFeedback.error();
+                                    if (attempts >= maxAttempts) {
+                                        this.showToast('Too many failed attempts. Try again later.', 'error');
+                                        setTimeout(() => location.reload(), 30000);
+                                    } else {
+                                        this.showToast(`Incorrect PIN. ${maxAttempts - attempts} attempts remaining.`, 'error');
+                                        enteredPin = '';
+                                        updateDisplay();
+                                    }
+                                }
+                            }, 150);
+                        }
+                    }
+                });
+            }
+        });
+
+        backspace.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            HapticFeedback.light();
+            backspace.classList.add('pressed');
+        }, { passive: false });
+
+        backspace.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            backspace.classList.remove('pressed');
+            enteredPin = enteredPin.slice(0, -1);
+            updateDisplay();
+        }, { passive: false });
+
+        backspace.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            enteredPin = enteredPin.slice(0, -1);
+            updateDisplay();
+        });
+    }
 
 
+    unlockApp() {
+        localStorage.setItem('app_locked', 'false');
+        localStorage.setItem('last_unlock_time', Date.now().toString());
 
+        // Initialize the app UI after unlocking
+        this.setupEventListeners();
+        this.renderHome();
+        this.updateCategoryCounts();
+        this.updateNotificationBadge();
+        this.initNotifications();
+        this.checkNotificationPermission();
+        this.startNotificationChecker();
 
+        this.showToast('App unlocked', 'success');
+    }
 
+    lockApp() {
+        localStorage.setItem('app_locked', 'true');
+        this.showPinEntry();
+    }
+
+    forgotPin() {
+        if (confirm('This will disable PIN lock. Are you sure?')) {
+            localStorage.removeItem('app_pin');
+            localStorage.setItem('pin_lock_enabled', 'false');
+            const toggle = document.getElementById('pin-lock-toggle');
+            if (toggle) toggle.checked = false;
+            this.showPinOptions(false);
+            this.updatePinStatus();
+            this.showToast('PIN lock disabled', 'success');
+            document.querySelector('.pin-overlay').remove();
+        }
+    }
+
+    changePin() {
+        this.showPinVerification('change');
+    }
+
+    showPinVerification(reason) {
+        const modal = this.createPinModal('verify');
+        modal.innerHTML = `
+            <div class="pin-modal">
+                <div class="pin-header">
+                    <h3>Verify PIN</h3>
+                    <p>Enter your current PIN</p>
+                </div>
+                <div class="pin-display">
+                    <div class="pin-dots">
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-value="1">1</button>
+                    <button class="pin-key" data-value="2">2</button>
+                    <button class="pin-key" data-value="3">3</button>
+                    <button class="pin-key" data-value="4">4</button>
+                    <button class="pin-key" data-value="5">5</button>
+                    <button class="pin-key" data-value="6">6</button>
+                    <button class="pin-key" data-value="7">7</button>
+                    <button class="pin-key" data-value="8">8</button>
+                    <button class="pin-key" data-value="9">9</button>
+                    <button class="pin-key pin-spacer"></button>
+                    <button class="pin-key" data-value="0">0</button>
+                    <button class="pin-key pin-backspace" id="pin-verify-backspace">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="pin-actions">
+                    <button class="pin-btn-secondary" onclick="this.closest('.pin-overlay').remove()">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.initPinVerification(modal, reason);
+    }
+
+    initPinVerification(modal, reason) {
+        let enteredPin = '';
+
+        const dots = modal.querySelectorAll('.pin-dot');
+        const keys = modal.querySelectorAll('.pin-key:not(.pin-spacer)');
+        const backspace = modal.querySelector('#pin-verify-backspace');
+
+        const updateDisplay = () => {
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < enteredPin.length);
+            });
+        };
+
+        keys.forEach(key => {
+            if (key.dataset.value) {
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    HapticFeedback.light();
+                    key.classList.add('pressed');
+                }, { passive: false });
+
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    key.classList.remove('pressed');
+                }, { passive: false });
+
+                key.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const value = key.dataset.value;
+
+                    if (enteredPin.length < 4) {
+                        enteredPin += value;
+                        updateDisplay();
+
+                        if (enteredPin.length === 4) {
+                            setTimeout(() => {
+                                const storedPin = localStorage.getItem('app_pin');
+                                if (enteredPin === storedPin) {
+                                    console.log('PIN verification successful');
+                                    // Force close modal immediately
+                                    try {
+                                        modal.classList.add('hidden');
+                                        modal.style.display = 'none';
+                                        modal.style.visibility = 'hidden';
+                                        modal.style.opacity = '0';
+
+                                        setTimeout(() => {
+                                            try {
+                                                if (modal && modal.parentNode) {
+                                                    modal.parentNode.removeChild(modal);
+                                                    console.log('PIN verification modal removed');
+                                                    if (reason === 'change') {
+                                                        console.log('Showing PIN setup for change');
+                                                        this.showPinSetup();
+                                                    }
+                                                }
+                                            } catch (e) {
+                                                console.error('Error removing PIN verification modal:', e);
+                                            }
+                                        }, 200);
+                                    } catch (e) {
+                                        console.error('Error hiding PIN verification modal:', e);
+                                        try {
+                                            if (modal && modal.parentNode) {
+                                                modal.parentNode.removeChild(modal);
+                                                if (reason === 'change') {
+                                                    this.showPinSetup();
+                                                }
+                                            }
+                                        } catch (e2) {
+                                            console.error('Fallback PIN verification modal removal failed:', e2);
+                                        }
+                                    }
+                                } else {
+                                    HapticFeedback.error();
+                                    this.showToast('Incorrect PIN', 'error');
+                                    enteredPin = '';
+                                    updateDisplay();
+                                }
+                            }, 150); // Reduced delay for faster response
+                        }
+                    }
+                });
+            }
+        });
+
+        backspace.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            HapticFeedback.light();
+            backspace.classList.add('pressed');
+        }, { passive: false });
+
+        backspace.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            backspace.classList.remove('pressed');
+        }, { passive: false });
+
+        backspace.addEventListener('click', (e) => {
+            e.preventDefault();
+            enteredPin = enteredPin.slice(0, -1);
+            updateDisplay();
+        });
+    }
+
+    showPinOptions(show) {
+        const options = document.getElementById('pin-lock-options');
+        if (options) {
+            options.style.display = show ? 'flex' : 'none';
+        }
+    }
+
+    updatePinSettings() {
+        const toggle = document.getElementById('pin-lock-toggle');
+        const pin = localStorage.getItem('app_pin');
+        const enabled = localStorage.getItem('pin_lock_enabled') === 'true';
+
+        if (toggle) {
+            toggle.checked = enabled && pin;
+        }
+        this.showPinOptions(enabled && pin);
+        this.updatePinStatus();
+    }
+
+    updatePinStatus() {
+        const statusText = document.getElementById('pin-status-text');
+        const pin = localStorage.getItem('app_pin');
+        const enabled = localStorage.getItem('pin_lock_enabled') === 'true';
+
+        if (statusText) {
+            if (pin && enabled) {
+                statusText.textContent = 'PIN lock active';
+                statusText.style.color = '#4ade80';
+            } else if (pin) {
+                statusText.textContent = 'PIN set, lock disabled';
+                statusText.style.color = '#fbbf24';
+            } else {
+                statusText.textContent = 'PIN not set';
+                statusText.style.color = '#6b7280';
+            }
+        }
+    }
+
+    checkPinLock() {
+        const pinEnabled = localStorage.getItem('pin_lock_enabled') === 'true';
+        const pin = localStorage.getItem('app_pin');
+        const isLocked = localStorage.getItem('app_locked') === 'true';
+        const lastUnlockTime = localStorage.getItem('last_unlock_time');
+
+        if (pinEnabled && pin) {
+            if (lastUnlockTime) {
+                const timeSinceUnlock = Date.now() - parseInt(lastUnlockTime);
+                if (timeSinceUnlock > 300000) { // 5 minutes
+                    this.lockApp();
+                    return true;
+                }
+            }
+
+            if (isLocked) {
+                this.showPinEntry();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Backup & Restore Functionality
+    createBackup() {
+        try {
+            const backupData = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                data: {
+                    todos: storage.getTodos(),
+                    cars: storage.getCars(),
+                    finances: storage.getFinances(),
+                    bills: storage.getBills(),
+                    subscriptions: storage.getAll('subscriptions') || [],
+                    insurances: storage.getAll('insurances') || [],
+                    checking: storage.getAll('checking') || [],
+                    savings: storage.getAll('savings') || [],
+                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}'),
+                    settings: {
+                        notifications: localStorage.getItem('notifications_enabled'),
+                        pinLock: localStorage.getItem('pin_lock_enabled'),
+                        // Note: PIN itself is not included for security
+                    }
+                }
+            };
+
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `houzz-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            HapticFeedback.success();
+            this.showToast('Backup created successfully!', 'success');
+        } catch (error) {
+            console.error('Backup creation failed:', error);
+            HapticFeedback.error();
+            this.showToast('Backup creation failed', 'error');
+        }
+    }
 
     restoreBackup(fileInput) {
         const file = fileInput.files[0];
@@ -733,6 +1411,19 @@ class HomeManagerApp {
             isSwiping = false;
         }, { passive: true });
 
+        // PIN Security: Auto-lock when app goes to background
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && localStorage.getItem('pin_lock_enabled') === 'true') {
+                this.lockApp();
+            }
+        });
+
+        // PIN Security: Lock when page unloads
+        window.addEventListener('beforeunload', () => {
+            if (localStorage.getItem('pin_lock_enabled') === 'true') {
+                localStorage.setItem('app_locked', 'true');
+            }
+        });
     }
 
     handleSwipe(startX, startY, endX, endY) {
