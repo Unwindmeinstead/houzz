@@ -277,36 +277,12 @@ class HomeManagerApp {
                     this.showToast('PIN set successfully', 'success');
                     console.log('Closing modal...');
 
-                    // Force close modal immediately
-                    try {
-                        modal.classList.add('hidden');
-                        modal.style.display = 'none';
-                        modal.style.visibility = 'hidden';
-                        modal.style.opacity = '0';
-
-                        // Remove from DOM after a short delay
-                        setTimeout(() => {
-                            try {
-                                if (modal && modal.parentNode) {
-                                    console.log('Removing modal from DOM');
-                                    modal.parentNode.removeChild(modal);
-                                } else {
-                                    console.log('Modal already removed or not found');
-                                }
-                            } catch (e) {
-                                console.error('Error removing modal:', e);
-                            }
-                        }, 200);
-                    } catch (e) {
-                        console.error('Error hiding modal:', e);
-                        // Fallback - try to remove directly
-                        try {
-                            if (modal && modal.parentNode) {
-                                modal.parentNode.removeChild(modal);
-                            }
-                        } catch (e2) {
-                            console.error('Fallback modal removal failed:', e2);
-                        }
+                    // Close modal immediately
+                    if (modal && modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                        console.log('PIN setup modal removed successfully');
+                    } else {
+                        console.error('Could not find modal to remove');
                     }
 
                 } else {
@@ -414,32 +390,12 @@ class HomeManagerApp {
                                 if (enteredPin === storedPin) {
                                     console.log('Correct PIN entered, unlocking...');
                                     this.unlockApp();
-                                    // Force close modal immediately
-                                    try {
-                                        modal.classList.add('hidden');
-                                        modal.style.display = 'none';
-                                        modal.style.visibility = 'hidden';
-                                        modal.style.opacity = '0';
-
-                                        setTimeout(() => {
-                                            try {
-                                                if (modal && modal.parentNode) {
-                                                    modal.parentNode.removeChild(modal);
-                                                    console.log('PIN entry modal removed');
-                                                }
-                                            } catch (e) {
-                                                console.error('Error removing PIN entry modal:', e);
-                                            }
-                                        }, 200);
-                                    } catch (e) {
-                                        console.error('Error hiding PIN entry modal:', e);
-                                        try {
-                                            if (modal && modal.parentNode) {
-                                                modal.parentNode.removeChild(modal);
-                                            }
-                                        } catch (e2) {
-                                            console.error('Fallback PIN entry modal removal failed:', e2);
-                                        }
+                                    // Close modal immediately
+                                    if (modal && modal.parentNode) {
+                                        modal.parentNode.removeChild(modal);
+                                        console.log('PIN entry modal removed successfully');
+                                    } else {
+                                        console.error('Could not find PIN entry modal to remove');
                                     }
                                 } else {
                                     attempts++;
@@ -2187,7 +2143,7 @@ class HomeManagerApp {
         }
 
         this.closeOverlay();
-
+        
         // If adding a new item (not editing), navigate to the relevant view
         if (!id) {
             // Map category to view
@@ -2201,9 +2157,9 @@ class HomeManagerApp {
                 'subscriptions': 'insurances',
                 'savings': 'home'
             };
-
+            
             const targetView = categoryToView[category] || 'home';
-
+            
             // Switch to the relevant view
             if (targetView === 'home') {
                 this.switchView('home');
@@ -4581,7 +4537,7 @@ class HomeManagerApp {
                     <div class="chart-wrapper">
                         <div class="chart-canvas" id="finance-chart">
                             ${this.renderLineChart(financeChartData, 'finance')}
-                        </div>
+                    </div>
                         <div class="chart-legend">
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #22c55e"></div>
@@ -4601,7 +4557,7 @@ class HomeManagerApp {
                     <div class="chart-wrapper">
                         <div class="chart-canvas" id="savings-chart">
                             ${this.renderAreaChart(savingsChartData, 'savings')}
-                        </div>
+                    </div>
                         <div class="chart-legend">
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #3b82f6"></div>
@@ -4621,7 +4577,7 @@ class HomeManagerApp {
                     <div class="chart-wrapper">
                         <div class="chart-canvas" id="bills-chart">
                             ${this.renderBarChart(billsChartData, 'bills')}
-                        </div>
+                    </div>
                         <div class="chart-legend">
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #f59e0b"></div>
@@ -4637,8 +4593,8 @@ class HomeManagerApp {
                             </div>
                         </div>
                     </div>
+                    </div>
                 </div>
-            </div>
 
             <!-- Summary Cards -->
             <div class="insights-summary">
@@ -4828,7 +4784,7 @@ class HomeManagerApp {
                         <circle cx="${expenseX}" cy="${expenseY}" r="4" fill="#ef4444"/>
                     `;
                 }).join('')}
-            </svg>
+                        </svg>
         `;
     }
 
@@ -4958,17 +4914,17 @@ class HomeManagerApp {
                 <div class="summary-icon">💰</div>
                 <div class="summary-value">$${netIncome.toFixed(0)}</div>
                 <div class="summary-label">Net Income</div>
-            </div>
+                    </div>
             <div class="summary-card">
                 <div class="summary-icon">💸</div>
                 <div class="summary-value">$${totalSavings.toFixed(0)}</div>
                 <div class="summary-label">Total Savings</div>
-            </div>
+                    </div>
             <div class="summary-card">
                 <div class="summary-icon">🏦</div>
                 <div class="summary-value">$${totalChecking.toFixed(0)}</div>
                 <div class="summary-label">Checking Balance</div>
-            </div>
+                </div>
             <div class="summary-card">
                 <div class="summary-icon">📄</div>
                 <div class="summary-value">$${monthlyBills.toFixed(0)}</div>
