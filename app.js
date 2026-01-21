@@ -390,13 +390,15 @@ class HomeManagerApp {
                                 if (enteredPin === storedPin) {
                                     console.log('Correct PIN entered, unlocking...');
                                     this.unlockApp();
-                                    // Close modal immediately
-                                    if (modal && modal.parentNode) {
-                                        modal.parentNode.removeChild(modal);
-                                        console.log('PIN entry modal removed successfully');
-                                    } else {
-                                        console.error('Could not find PIN entry modal to remove');
-                                    }
+                                    // Close modal after app is unlocked
+                                    setTimeout(() => {
+                                        if (modal && modal.parentNode) {
+                                            modal.parentNode.removeChild(modal);
+                                            console.log('PIN entry modal removed successfully');
+                                        } else {
+                                            console.error('Could not find PIN entry modal to remove');
+                                        }
+                                    }, 100);
                                 } else {
                                     attempts++;
                                     HapticFeedback.error();
@@ -440,6 +442,16 @@ class HomeManagerApp {
     unlockApp() {
         localStorage.setItem('app_locked', 'false');
         localStorage.setItem('last_unlock_time', Date.now().toString());
+
+        // Initialize the app UI after unlocking
+        this.setupEventListeners();
+        this.renderHome();
+        this.updateCategoryCounts();
+        this.updateNotificationBadge();
+        this.initNotifications();
+        this.checkNotificationPermission();
+        this.startNotificationChecker();
+
         this.showToast('App unlocked', 'success');
     }
 
