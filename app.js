@@ -200,19 +200,37 @@ class HomeManagerApp {
 
         keys.forEach(key => {
             if (key.dataset.value) {
+                // Handle touch events for mobile
                 key.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     HapticFeedback.light();
                     key.classList.add('pressed');
                 }, { passive: false });
 
                 key.addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     key.classList.remove('pressed');
+
+                    // Process the key press on touch end
+                    const value = key.dataset.value;
+                    const currentPin = step === 'create' ? pin : confirmPin;
+
+                    if (currentPin.length < 4) {
+                        if (step === 'create') {
+                            pin += value;
+                        } else {
+                            confirmPin += value;
+                        }
+                        updateDisplay();
+                    }
                 }, { passive: false });
 
+                // Handle click events for desktop
                 key.addEventListener('click', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     const value = key.dataset.value;
                     const currentPin = step === 'create' ? pin : confirmPin;
 
@@ -366,77 +384,94 @@ class HomeManagerApp {
 
         keys.forEach(key => {
             if (key.dataset.value) {
+                // Handle touch events for mobile
                 key.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     HapticFeedback.light();
                     key.classList.add('pressed');
                 }, { passive: false });
 
                 key.addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     key.classList.remove('pressed');
+
+                    // Process the key press on touch end
+                    const value = key.dataset.value;
+                    this.processPinKeyPress(value, enteredPin, updateDisplay, storedPin, modal, attempts, maxAttempts);
                 }, { passive: false });
 
+                // Handle click events for desktop
                 key.addEventListener('click', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     const value = key.dataset.value;
-
-                    if (enteredPin.length < 4) {
-                        enteredPin += value;
-                        updateDisplay();
-
-                        if (enteredPin.length === 4) {
-                            setTimeout(() => {
-                                if (enteredPin === storedPin) {
-                                    console.log('Correct PIN entered, unlocking...');
-                                    this.unlockApp();
-                                    // Close modal after app is unlocked
-                                    setTimeout(() => {
-                                        if (modal && modal.parentNode) {
-                                            modal.parentNode.removeChild(modal);
-                                            console.log('PIN entry modal removed successfully');
-                                        } else {
-                                            console.error('Could not find PIN entry modal to remove');
-                                        }
-                                    }, 100);
-                                } else {
-                                    attempts++;
-                                    HapticFeedback.error();
-
-                                    if (attempts >= maxAttempts) {
-                                        this.showToast('Too many failed attempts. Try again later.', 'error');
-                                        setTimeout(() => {
-                                            location.reload();
-                                        }, 30000);
-                                    } else {
-                                        this.showToast(`Incorrect PIN. ${maxAttempts - attempts} attempts remaining.`, 'error');
-                                        enteredPin = '';
-                                        updateDisplay();
-                                    }
-                                }
-                            }, 150); // Reduced delay for faster response
-                        }
-                    }
+                    this.processPinKeyPress(value, enteredPin, updateDisplay, storedPin, modal, attempts, maxAttempts);
                 });
             }
         });
 
         backspace.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             HapticFeedback.light();
             backspace.classList.add('pressed');
         }, { passive: false });
 
         backspace.addEventListener('touchend', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             backspace.classList.remove('pressed');
+            enteredPin = enteredPin.slice(0, -1);
+            updateDisplay();
         }, { passive: false });
 
         backspace.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             enteredPin = enteredPin.slice(0, -1);
             updateDisplay();
         });
+    }
+
+    processPinKeyPress(value, enteredPin, updateDisplay, storedPin, modal, attempts, maxAttempts) {
+        if (enteredPin.length < 4) {
+            enteredPin += value;
+            updateDisplay();
+
+            if (enteredPin.length === 4) {
+                setTimeout(() => {
+                    if (enteredPin === storedPin) {
+                        console.log('Correct PIN entered, unlocking...');
+                        this.unlockApp();
+                        // Close modal after app is unlocked
+                        setTimeout(() => {
+                            if (modal && modal.parentNode) {
+                                modal.parentNode.removeChild(modal);
+                                console.log('PIN entry modal removed successfully');
+                            } else {
+                                console.error('Could not find PIN entry modal to remove');
+                            }
+                        }, 100);
+                    } else {
+                        attempts++;
+                        HapticFeedback.error();
+
+                        if (attempts >= maxAttempts) {
+                            this.showToast('Too many failed attempts. Try again later.', 'error');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 30000);
+                        } else {
+                            this.showToast(`Incorrect PIN. ${maxAttempts - attempts} attempts remaining.`, 'error');
+                            enteredPin = '';
+                            updateDisplay();
+                        }
+                    }
+                }, 150); // Reduced delay for faster response
+            }
+        }
     }
 
     unlockApp() {
